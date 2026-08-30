@@ -45,6 +45,7 @@ async fn main() -> std::io::Result<()> {
             format!("invalid bundle configuration: {error}"),
         )
     })?;
+    let bundle_engine_mode = config.bundle_engine_mode;
 
     let admission = AdmissionConfig::from_env().map_err(|error| {
         std::io::Error::new(
@@ -119,13 +120,14 @@ async fn main() -> std::io::Result<()> {
             bundle_runtime.max_uncompressed_bytes,
         )
         .map_err(|error| std::io::Error::new(std::io::ErrorKind::InvalidInput, error))?;
-        BundleFetcher::new(
+        BundleFetcher::new_with_engine_mode(
             store.clone(),
             bundle_url,
             config.bundle_refresh,
             limits,
             bundle_runtime.signature_policy,
             bundle_runtime.trust_store.clone(),
+            bundle_engine_mode,
         )
         .map_err(|error| {
             std::io::Error::new(
@@ -160,6 +162,7 @@ async fn main() -> std::io::Result<()> {
             .app_data(actix_web::web::Data::new(parallel_config))
             .app_data(actix_web::web::Data::new(authorize_runtime))
             .app_data(actix_web::web::Data::new(bundle_runtime.clone()))
+            .app_data(actix_web::web::Data::new(bundle_engine_mode))
             .app_data(actix_web::web::Data::new(metrics_registry.clone()))
             .configure(treetop_rest::handlers::init)
     })

@@ -8,6 +8,7 @@ use std::time::Duration;
 use tracing::{debug, error, info};
 use treetop_bundle::{ArchiveLimits, BundleArchive, BundleError, SignaturePolicy, TrustStore};
 
+use crate::config::BundleEngineMode;
 use crate::errors::ServiceError;
 use crate::metrics::{self, BundleFailureReason};
 use crate::models::Endpoint;
@@ -22,6 +23,7 @@ pub struct BundleFetcher {
     limits: ArchiveLimits,
     signature_policy: SignaturePolicy,
     trust_store: Arc<TrustStore>,
+    engine_mode: BundleEngineMode,
     etag: Option<String>,
     last_modified: Option<String>,
     archive_sha256: Option<String>,
@@ -36,6 +38,26 @@ impl BundleFetcher {
         signature_policy: SignaturePolicy,
         trust_store: Arc<TrustStore>,
     ) -> Result<Self, ServiceError> {
+        Self::new_with_engine_mode(
+            store,
+            url,
+            refresh_secs,
+            limits,
+            signature_policy,
+            trust_store,
+            BundleEngineMode::Monolithic,
+        )
+    }
+
+    pub fn new_with_engine_mode(
+        store: Arc<RwLock<PolicyStore>>,
+        url: Endpoint,
+        refresh_secs: u32,
+        limits: ArchiveLimits,
+        signature_policy: SignaturePolicy,
+        trust_store: Arc<TrustStore>,
+        engine_mode: BundleEngineMode,
+    ) -> Result<Self, ServiceError> {
         if refresh_secs == 0 {
             return Err(ServiceError::ValidationError(
                 "bundle refresh frequency must be greater than zero".to_string(),
@@ -49,6 +71,7 @@ impl BundleFetcher {
             limits,
             signature_policy,
             trust_store,
+            engine_mode,
             etag: None,
             last_modified: None,
             archive_sha256: None,
@@ -160,6 +183,7 @@ impl BundleFetcher {
             })?;
             store.schema_validation_mode
         };
+        let engine_mode = self.engine_mode;
         let (prepared, bundle_id, signing_key_id) = tokio::task::spawn_blocking(move || {
             let archive = BundleArchive::from_bytes(bytes);
             let validated = archive
@@ -172,11 +196,12 @@ impl BundleFetcher {
                 .verified_signature()
                 .key_id()
                 .map(ToOwned::to_owned);
-            let prepared = PolicyStore::prepare_bundle(
+            let prepared = PolicyStore::prepare_bundle_with_engine_mode(
                 &validated,
                 Some(source),
                 Some(refresh_frequency),
                 schema_validation_mode,
+                engine_mode,
             )
             .inspect_err(|_| {
                 metrics::record_bundle_failure(BundleFailureReason::Validation);
@@ -207,6 +232,7 @@ impl BundleFetcher {
         info!(
             message = "verified bundle applied",
             bundle_id,
+            engine_mode = %self.engine_mode,
             key_id = signing_key_id.as_deref()
         );
         Ok(())

@@ -23,7 +23,7 @@ use utoipa::{
 };
 
 use crate::build_info::build_info;
-use crate::config::{BundleRuntimeConfig, SchemaValidationMode};
+use crate::config::{BundleEngineMode, BundleRuntimeConfig, SchemaValidationMode};
 use crate::errors::{ErrorResponse, ServiceError};
 use crate::metrics;
 use crate::models::{
@@ -841,6 +841,7 @@ pub async fn upload_bundle(
     mut payload: web::Payload,
     store: web::Data<SharedPolicyStore>,
     runtime: web::Data<BundleRuntimeConfig>,
+    configured_engine_mode: Option<web::Data<BundleEngineMode>>,
 ) -> Result<web::Json<PoliciesMetadata>, ServiceError> {
     // Authentication is deliberately checked before the request body is polled.
     let (allow_upload, schema_validation_mode) = {
@@ -884,6 +885,7 @@ pub async fn upload_bundle(
 
     let limits = ArchiveLimits::new(runtime.max_compressed_bytes, runtime.max_uncompressed_bytes)?;
     let signature_policy = runtime.signature_policy;
+    let engine_mode = configured_engine_mode.map_or(BundleEngineMode::Monolithic, |mode| **mode);
     let trust_store = runtime.trust_store.clone();
     let (prepared, mut response, bundle_id, signing_key_id) = web::block(move || {
         let archive = BundleArchive::from_bytes(bytes);
@@ -898,11 +900,12 @@ pub async fn upload_bundle(
             .verified_signature()
             .key_id()
             .map(ToOwned::to_owned);
-        let prepared = crate::state::PolicyStore::prepare_bundle(
+        let prepared = crate::state::PolicyStore::prepare_bundle_with_engine_mode(
             &validated,
             None,
             None,
             schema_validation_mode,
+            engine_mode,
         )
         .inspect_err(|_| {
             metrics::record_bundle_failure(metrics::BundleFailureReason::Validation);
@@ -932,6 +935,7 @@ pub async fn upload_bundle(
     debug!(
         message = "uploaded bundle applied",
         bundle_id,
+        engine_mode = %engine_mode,
         key_id = signing_key_id.as_deref()
     );
     Ok(web::Json(response))

@@ -1197,7 +1197,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "39cab71617ae0d63f51a36d69f866391735b51691dbda63cf6f96d042b63efeb"
 dependencies = [
  "libc",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -2795,7 +2795,7 @@ dependencies = [
  "once_cell",
  "socket2",
  "tracing",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3090,7 +3090,7 @@ dependencies = [
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3147,7 +3147,7 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3647,7 +3647,7 @@ dependencies = [
  "getrandom 0.4.3",
  "once_cell",
  "rustix",
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]
@@ -3985,8 +3985,7 @@ dependencies = [
 [[package]]
 name = "treetop-bundle"
 version = "0.0.5"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f0e6f05d3b3a277d1a4de7124b28a07d969cb4ca3962955a586c6795712da0e6"
+source = "git+https://github.com/treetop-policy-engine/treetop-bundle?rev=784d07363276904cfef0def3064873d75b55a4b0#784d07363276904cfef0def3064873d75b55a4b0"
 dependencies = [
  "base64 0.23.1",
  "cedar-policy",
@@ -4005,9 +4004,9 @@ dependencies = [
 
 [[package]]
 name = "treetop-core"
-version = "0.0.22"
+version = "0.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "90e509823778c078c04d39c7c8b2ebf06d8ca13c6bd3124799b900c7969b1178"
+checksum = "476c281a84f87636ab292752f1b563c144412d7b998744c3028a60e2692523a4"
 dependencies = [
  "arc-swap",
  "cedar-policy",
@@ -4446,7 +4445,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c2a7b1c03c876122aa43f3020e6c3c3ee5c05081c9a00739faf7503aeba10d22"
 dependencies = [
- "windows-sys 0.52.0",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

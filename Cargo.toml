@@ -45,8 +45,8 @@ tracing-subscriber = { version = "0.3.23", features = [
     "serde",
     "serde_json",
 ] }
-treetop-core = { version = "0.0.22", features = ["observability"] }
-treetop-bundle = { version = "=0.0.5", default-features = false }
+treetop-core = { version = "0.0.23", features = ["observability"] }
+treetop-bundle = { git = "https://github.com/treetop-policy-engine/treetop-bundle", rev = "784d07363276904cfef0def3064873d75b55a4b0", default-features = false }
 prometheus-client = { version = "0.25.0", features = ["prometheus_protobuf", "protobuf-protox"] }
 url = { version = "2.5.8", features = ["serde"] }
 utoipa = { version = "5.5.0", features = ["actix_extras", "chrono", "yaml"] }
@@ -62,7 +62,7 @@ ed25519-dalek = { version = "3.0.0", features = ["pem", "pkcs8"] }
 rstest = "0.26.1"
 tempfile = "3.27.0"
 gungraun = "0.19.4"
-treetop-core = { version = "0.0.22", features = ["bench-internal"] }
+treetop-core = { version = "0.0.23", features = ["bench-internal"] }
 
 [build-dependencies]
 cargo_metadata = "0.23.1"

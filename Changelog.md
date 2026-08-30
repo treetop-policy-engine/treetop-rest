@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added the opt-in `--bundle-engine-mode=bundle-modules` /
+  `TREETOP_BUNDLE_ENGINE_MODE=bundle-modules` loading path. It derives namespace-partitioned Core policy stores from
+  validated ordinary bundle modules, replicates global-module policies into every store, logs the active mode on
+  successful bundle application, and fails closed when module boundaries are not independent.
+
+### Changed
+
+- Updated `treetop-core` to 0.0.23. Existing deployments remain on the `monolithic` bundle engine mode by default, raw
+  Cedar loading remains monolithic, and the bundle archive format remains version 1.
+
 ## [0.0.14] - 2026-08-18
 
 ### Added

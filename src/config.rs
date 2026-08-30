@@ -29,6 +29,25 @@ pub enum BundleSignaturePolicy {
     Required,
 }
 
+/// How validated bundles are compiled into the policy engine.
+#[derive(clap::ValueEnum, Debug, Clone, Copy, PartialEq, Eq, Default)]
+pub enum BundleEngineMode {
+    /// Compile every module into one Cedar policy set.
+    #[default]
+    Monolithic,
+    /// Compile each ordinary module as an independent namespace store.
+    BundleModules,
+}
+
+impl fmt::Display for BundleEngineMode {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Self::Monolithic => write!(f, "monolithic"),
+            Self::BundleModules => write!(f, "bundle-modules"),
+        }
+    }
+}
+
 impl From<BundleSignaturePolicy> for SignaturePolicy {
     fn from(value: BundleSignaturePolicy) -> Self {
         match value {
@@ -128,6 +147,15 @@ pub struct Config {
     /// Bundle refresh frequency in seconds.
     #[clap(long, env = "TREETOP_BUNDLE_UPDATE_FREQUENCY", default_value = "60")]
     pub bundle_refresh: u32,
+
+    /// Policy-engine layout used when loading validated bundles.
+    #[clap(
+        long,
+        env = "TREETOP_BUNDLE_ENGINE_MODE",
+        value_enum,
+        default_value = "monolithic"
+    )]
+    pub bundle_engine_mode: BundleEngineMode,
 
     /// Maximum compressed bundle size in bytes.
     #[clap(
@@ -600,6 +628,20 @@ mod tests {
 
         let error = config.bundle_runtime_config().unwrap_err();
         assert!(error.to_string().contains("greater than zero"));
+    }
+
+    #[test]
+    fn bundle_engine_mode_is_an_explicit_opt_in() {
+        let default = Config::try_parse_from(["treetop-server"]).unwrap();
+        assert_eq!(default.bundle_engine_mode, BundleEngineMode::Monolithic);
+
+        let configured =
+            Config::try_parse_from(["treetop-server", "--bundle-engine-mode", "bundle-modules"])
+                .unwrap();
+        assert_eq!(
+            configured.bundle_engine_mode,
+            BundleEngineMode::BundleModules
+        );
     }
 
     #[test]
