@@ -40,6 +40,7 @@ The server uses **command-line flags** and **environment variables**. There is *
 | `--schema-validation-mode` | `TREETOP_SCHEMA_VALIDATION_MODE` | `permissive` | Schema enforcement mode (`permissive` or `strict`) for policy/schema and bundle reloads. |
 | `--bundle-url` | `TREETOP_BUNDLE_URL` | _(none)_ | URL to fetch a complete `.tar.gz` policy bundle from. |
 | `--bundle-refresh` | `TREETOP_BUNDLE_UPDATE_FREQUENCY` | `60` | Poll interval for `TREETOP_BUNDLE_URL`, in seconds. |
+| `--bundle-engine-mode` | `TREETOP_BUNDLE_ENGINE_MODE` | `monolithic` | Compile bundles as one policy set (`monolithic`) or derive namespace stores from ordinary modules (`bundle-modules`). |
 | `--max-bundle-compressed-bytes` | `TREETOP_MAX_BUNDLE_COMPRESSED_BYTES` | `10485760` | Maximum compressed bundle size. |
 | `--max-bundle-uncompressed-bytes` | `TREETOP_MAX_BUNDLE_UNCOMPRESSED_BYTES` | `52428800` | Maximum total uncompressed bundle size. |
 | `--bundle-trusted-key` | `TREETOP_BUNDLE_TRUSTED_KEYS` | _(none)_ | Trusted Ed25519 SPKI PEM public key; repeat the flag or comma-separate environment paths. |
@@ -62,6 +63,13 @@ value is set.
 - `--bundle-url` is mutually exclusive with policy, label, and schema URLs. Bundle mode validates policies, schema, and
   labels together and atomically replaces the active state only after every check succeeds. Its refresh frequency must
   be greater than zero.
+- `bundle-modules` is an explicit load-time optimization. Each ordinary bundle module supplies one store ID and
+  namespace root; global-module policies are installed in every store. Store IDs and namespaces are taken only from a
+  validated bundle, not from authorization request data. Overlapping namespaces, cross-store policies, and unroutable
+  requests fail closed. A failed store build leaves the last-known-good engine active.
+- The bundle archive remains format version 1. Both remote and uploaded bundles use the configured engine mode, which
+  is included in successful bundle-application logs. Raw policy uploads and the legacy policy URL remain monolithic
+  because they have no trusted module layout.
 - Strict schema mode rejects every fetched or uploaded bundle that does not include a schema.
 - Bundle uploads obey the lower of `--max-request-size` and `--max-bundle-compressed-bytes`.
 - `allow-unsigned` accepts unsigned bundles, but any signature that is present must verify against a configured trusted

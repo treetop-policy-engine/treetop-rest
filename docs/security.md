@@ -125,7 +125,7 @@ continue with schema-free or schema-incompatible fallback behavior where documen
 
 ## Bundles and signatures
 
-Use the [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.5/README.md) to validate,
+Use the [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.6/README.md) to validate,
 build, and optionally sign deterministic bundle archives.
 
 `TREETOP_BUNDLE_SIGNATURE_POLICY` controls signature enforcement:
@@ -140,7 +140,7 @@ and is loaded once at startup. Invalid key files or conflicting duplicate key ID
 requires a restart.
 
 Private signing keys and passphrases belong only on the bundle-build system. Treetop REST has no private-key setting
-and never loads private signing material. `treetop-bundle` 0.0.5 can load password-encrypted PKCS#8 private keys; that
+and never loads private signing material. `treetop-bundle` 0.0.6 can load password-encrypted PKCS#8 private keys; that
 feature is unnecessary in the REST service and does not affect verification of the resulting Ed25519 signature.
 
 A signature authenticates bundle bytes and protects their integrity. It does not encrypt bundle content, hide policy

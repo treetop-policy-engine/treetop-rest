@@ -7,7 +7,8 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 use tempfile::TempDir;
 use treetop_bundle::{BundleBuilder, SignaturePolicy, SigningKey, TrustStore, TrustedKey};
-use treetop_rest::config::{BundleRuntimeConfig, Config};
+use treetop_core::{Action, Decision, Principal, Request, Resource, User};
+use treetop_rest::config::{BundleEngineMode, BundleRuntimeConfig, Config};
 use treetop_rest::handlers;
 use treetop_rest::state::{PolicyStore, parse_labels};
 
@@ -116,6 +117,44 @@ async fn bundle_upload_applies_complete_state_and_metadata() {
     assert_eq!(store.labels.entries, 0);
     assert_eq!(store.schema.entries, 0);
     assert!(store.bundle.is_some());
+    assert!(store.engine.policy_store_ids().is_none());
+}
+
+#[actix_web::test]
+async fn bundle_module_mode_builds_namespace_policy_stores() {
+    let store = upload_store();
+    let app = test::init_service(
+        App::new()
+            .app_data(web::Data::new(store.clone()))
+            .app_data(web::Data::new(runtime(SignaturePolicy::AllowUnsigned)))
+            .app_data(web::Data::new(BundleEngineMode::BundleModules))
+            .route("/api/v1/bundle", web::post().to(handlers::upload_bundle)),
+    )
+    .await;
+
+    let response = test::call_service(&app, bundle_request(policy_store_archive())).await;
+
+    assert_eq!(response.status(), StatusCode::OK);
+    let store = store.read().unwrap();
+    let store_ids = store.engine.policy_store_ids().unwrap();
+    assert_eq!(store_ids[0].as_str(), "dns");
+    assert_eq!(store_ids[1].as_str(), "www");
+    let request = Request {
+        principal: Principal::User(User::new(
+            "blocked",
+            None,
+            Some(vec!["Organization".to_string()]),
+        )),
+        action: Action::new(
+            "read",
+            Some(vec!["ExampleCo".to_string(), "DNS".to_string()]),
+        ),
+        resource: Resource::new("ExampleCo::DNS::Host", "host-1"),
+    };
+    assert!(matches!(
+        store.engine.evaluate(&request).unwrap(),
+        Decision::Deny { .. }
+    ));
 }
 
 #[actix_web::test]
@@ -428,6 +467,94 @@ fn runtime_with_keys<const N: usize>(
         max_compressed_bytes: 10 * 1024 * 1024,
         max_uncompressed_bytes: 50 * 1024 * 1024,
     }
+}
+
+fn policy_store_archive() -> Vec<u8> {
+    let temporary = tempfile::tempdir().unwrap();
+    let root = temporary.path();
+    write(
+        root.join("dns.cedar"),
+        r#"
+@id("dns.read")
+permit (
+    principal,
+    action == ExampleCo::DNS::Action::"read",
+    resource is ExampleCo::DNS::Host
+);
+"#,
+    );
+    write(
+        root.join("dns-module.toml"),
+        r#"
+format_version = 1
+name = "dns"
+namespace = "ExampleCo::DNS"
+policies = ["dns.cedar"]
+"#,
+    );
+    write(
+        root.join("www.cedar"),
+        r#"
+@id("www.read")
+permit (
+    principal,
+    action == ExampleCo::WWW::Action::"read",
+    resource is ExampleCo::WWW::Page
+);
+"#,
+    );
+    write(
+        root.join("www-module.toml"),
+        r#"
+format_version = 1
+name = "www"
+namespace = "ExampleCo::WWW"
+policies = ["www.cedar"]
+"#,
+    );
+    write(
+        root.join("global.cedar"),
+        r#"
+@id("platform.blocked")
+forbid (
+    principal == Organization::User::"blocked",
+    action,
+    resource
+);
+"#,
+    );
+    write(
+        root.join("global-module.toml"),
+        r#"
+format_version = 1
+name = "platform"
+namespace = "ExampleCo::Platform"
+policies = ["global.cedar"]
+"#,
+    );
+    let manifest = root.join("treetop-bundle.toml");
+    write(
+        &manifest,
+        r#"
+format_version = 1
+name = "scoped"
+
+[[modules]]
+manifest = "dns-module.toml"
+
+[[modules]]
+manifest = "www-module.toml"
+
+[[modules]]
+manifest = "global-module.toml"
+role = "global"
+"#,
+    );
+    BundleBuilder::from_manifest(manifest)
+        .unwrap()
+        .build(None)
+        .unwrap()
+        .into_bytes()
 }
 
 fn bundle_request(bytes: Vec<u8>) -> actix_http::Request {

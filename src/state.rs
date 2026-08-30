@@ -16,7 +16,7 @@ use treetop_core::{LabelRegistryBuilder, Labeler, PolicyEngine};
 use utoipa::ToSchema;
 
 use crate::{
-    config::SchemaValidationMode,
+    config::{BundleEngineMode, SchemaValidationMode},
     errors::ServiceError,
     metrics,
     models::{BundleMetadata, Endpoint, PoliciesMetadata, RequestContextStatus, UserPolicies},
@@ -682,11 +682,31 @@ impl PolicyStore {
         refresh_frequency: Option<u32>,
         schema_validation_mode: SchemaValidationMode,
     ) -> Result<PreparedBundle, ServiceError> {
+        Self::prepare_bundle_with_engine_mode(
+            validated,
+            source,
+            refresh_frequency,
+            schema_validation_mode,
+            BundleEngineMode::Monolithic,
+        )
+    }
+
+    /// Prepare a complete bundle replacement using the selected engine layout.
+    pub fn prepare_bundle_with_engine_mode(
+        validated: &ValidatedBundle,
+        source: Option<Endpoint>,
+        refresh_frequency: Option<u32>,
+        schema_validation_mode: SchemaValidationMode,
+        engine_mode: BundleEngineMode,
+    ) -> Result<PreparedBundle, ServiceError> {
         Self::ensure_bundle_schema_present(
             schema_validation_mode,
             validated.schema_json().is_some(),
         )?;
-        let engine = Arc::new(validated.prepare_engine()?);
+        let engine = Arc::new(match engine_mode {
+            BundleEngineMode::Monolithic => validated.prepare_engine()?,
+            BundleEngineMode::BundleModules => validated.prepare_engine_with_policy_stores()?,
+        });
         let policies = Metadata::<OfPolicies>::from_validated_content(
             validated.policies().to_string(),
             source.clone(),

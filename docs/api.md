@@ -471,7 +471,7 @@ break the bundle's atomic policy/schema/label state.
 
 - Purpose: verify and atomically replace the complete policy, schema, and label state from a Treetop `.tar.gz` bundle.
 - Creation: use the
-  [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.5/README.md#commands) to validate,
+  [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.6/README.md#commands) to validate,
   build, and optionally sign compatible archives:
 
   ```bash
@@ -482,9 +482,9 @@ break the bundle's atomic policy/schema/label state.
 
   Private signing keys are build-time material: keep them and their passphrases on the system running
   `treetop-bundle`, and never upload or configure them in Treetop REST. The REST service loads only trusted Ed25519 SPKI
-  public keys for verification. `treetop-bundle` 0.0.5 supports password-encrypted PKCS#8 private keys through
+  public keys for verification. `treetop-bundle` 0.0.6 supports password-encrypted PKCS#8 private keys through
   `--signing-key-password-file` or `TREETOP_BUNDLE_SIGNING_KEY_PASSWORD`; see its
-  [signing-key documentation](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.5/README.md#signing-keys).
+  [signing-key documentation](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.6/README.md#signing-keys).
   REST does not enable encrypted-private-key loading because it never handles private keys; this does not affect its
   ability to verify bundles produced with encrypted signing keys.
 

@@ -46,6 +46,9 @@ The server supports the following environment variables:
   policy, labels, and schema URLs.
 - `TREETOP_BUNDLE_UPDATE_FREQUENCY`: Bundle polling frequency in seconds (default: `60`; must be greater than zero
   when `TREETOP_BUNDLE_URL` is set).
+- `TREETOP_BUNDLE_ENGINE_MODE`: `monolithic` or `bundle-modules` (default: `monolithic`). Module mode derives one
+  namespace-partitioned policy store from each ordinary bundle module and installs global-module policies in every
+  store.
 - `TREETOP_MAX_BUNDLE_COMPRESSED_BYTES`: Maximum compressed bundle size (default: `10485760`).
 - `TREETOP_MAX_BUNDLE_UNCOMPRESSED_BYTES`: Maximum total uncompressed bundle size (default: `52428800`).
 - `TREETOP_BUNDLE_TRUSTED_KEYS`: Comma-separated Ed25519 SPKI PEM public-key paths.
@@ -115,6 +118,13 @@ curl -X POST http://localhost:9999/api/v1/bundle \
   -H "X-Upload-Token: <upload-token>" \
   --data-binary @bundle.tar.gz
 ```
+
+Bundle archives keep the same version 1 format in both engine modes. `bundle-modules` uses the trusted module `name`,
+`namespace`, and `role` metadata already present in the archive; it rejects overlapping or cross-module policy
+boundaries instead of silently falling back to monolithic evaluation. Raw Cedar uploads remain monolithic because they
+do not carry a trusted module layout. See the
+[Core policy-store design](https://github.com/treetop-policy-engine/treetop-core/blob/main/docs/PolicyStores.md) for the
+assignment, annotation, routing, and global-policy rules.
 
 To check a request, you can use:
 
