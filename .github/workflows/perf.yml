@@ -11,9 +11,9 @@ permissions:
 jobs:
   rust-pr-bench:
     name: Gungraun PR Bench
-    uses: terjekv/rust-pr-bench/.github/workflows/rust-pr-bench.yml@0343a98c94e04d326c5fbfea753fad9934eee7be # v1.0.0
+    uses: terjekv/rust-pr-bench/.github/workflows/rust-pr-bench.yml@f5c13e4a9fcac61399967ee365f5b10e7ce992a9 # v1.1.1
     with:
-      action_ref: 0343a98c94e04d326c5fbfea753fad9934eee7be
+      action_ref: f5c13e4a9fcac61399967ee365f5b10e7ce992a9
       backend: gungraun
       auto_discover: true
       feature_sets_json: >-

@@ -16,8 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Updated `treetop-core` to 0.0.23. Existing deployments remain on the `monolithic` bundle engine mode by default, raw
-  Cedar loading remains monolithic, and the bundle archive format remains version 1.
+- Updated `treetop-core` to 0.0.23 and `treetop-bundle` to 0.0.6. Existing deployments remain on the `monolithic`
+  bundle engine mode by default, raw Cedar loading remains monolithic, and the bundle archive format remains version
+  1.
+- Refreshed Actix Web/runtime, LRU, UUID, build-metadata dependencies, and the pinned benchmark workflow to their
+  latest compatible stable releases.
 
 ## [0.0.14] - 2026-08-18
 

@@ -11,7 +11,7 @@ autobenches = false
 
 [dependencies]
 actix-service = "2.0.3"
-actix-web = { version = "4.14.1", default-features = false, features = [
+actix-web = { version = "4.15.0", default-features = false, features = [
     "macros",
     "compress-brotli",
     "compress-gzip",
@@ -27,7 +27,7 @@ env_logger = "0.11.11"
 futures = "0.3.34"
 futures-util = "0.3.34"
 ipnet = "2.12.1"
-lru = "0.18.2"
+lru = "0.18.3"
 rayon = "1.12.0"
 regex = "1.13.1"
 reqwest = { version = "0.13.4", features = ["json", "stream"] }
@@ -46,16 +46,16 @@ tracing-subscriber = { version = "0.3.23", features = [
     "serde_json",
 ] }
 treetop-core = { version = "0.0.23", features = ["observability"] }
-treetop-bundle = { git = "https://github.com/treetop-policy-engine/treetop-bundle", rev = "784d07363276904cfef0def3064873d75b55a4b0", default-features = false }
+treetop-bundle = { version = "=0.0.6", default-features = false }
 prometheus-client = { version = "0.25.0", features = ["prometheus_protobuf", "protobuf-protox"] }
 url = { version = "2.5.8", features = ["serde"] }
 utoipa = { version = "5.5.0", features = ["actix_extras", "chrono", "yaml"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web", "vendored"] }
-uuid = { version = "1.24.1", features = ["v4"] }
+uuid = { version = "1.26.0", features = ["v4"] }
 cedar-policy = "4.12.0"
 
 [dev-dependencies]
-actix-rt = "2.11.0"
+actix-rt = "2.13.0"
 actix-http = "3.13.3"
 base64 = "0.23.1"
 ed25519-dalek = { version = "3.0.0", features = ["pem", "pkcs8"] }
@@ -67,7 +67,7 @@ treetop-core = { version = "0.0.23", features = ["bench-internal"] }
 [build-dependencies]
 cargo_metadata = "0.23.1"
 serde_json = "1.0.151"
-vergen = { version = "10.0.2", features = [
+vergen = { version = "10.0.3", features = [
     "emit_and_set",
     "build",
     "cargo",
@@ -75,7 +75,7 @@ vergen = { version = "10.0.2", features = [
     "rustc",
     "si",
 ] }
-vergen-gitcl = { version = "10.0.2", features = [
+vergen-gitcl = { version = "10.0.3", features = [
     "emit_and_set",
     "build",
     "cargo",
