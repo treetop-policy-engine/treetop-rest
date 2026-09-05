@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Refresh Rust dependencies and pin GitHub Actions to their latest stable releases
-  before publication; preserve the existing compatibility requirements.
+- Refresh Rust dependencies in both committed lockfiles and pin GitHub Actions to
+  their latest stable releases before publication; preserve compatibility requirements.
 
 - Adopt Core 0.0.25 and Bundle's explicit `PreparedEngine` schema modes. Strict and permissive policy loading
   retain their existing behavior, and each authorization batch captures one frozen evaluation session.
