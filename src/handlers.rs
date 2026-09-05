@@ -34,7 +34,7 @@ use crate::models::{
 };
 use crate::parallel::ParallelConfig;
 use crate::state::SharedPolicyStore;
-use treetop_bundle::{ArchiveLimits, BundleArchive};
+use treetop_bundle::{ArchiveLimits, BundleArchive, PreparedEngine, PreparedEvaluationSession};
 
 /// Canonical HTTP path for the generated OpenAPI document.
 pub const OPENAPI_JSON_PATH: &str = "/openapi.json";
@@ -513,7 +513,7 @@ fn to_request_context(
 fn eval_one<T, F>(
     index: usize,
     auth_req: &AuthRequest,
-    engine_snapshot: &std::sync::Arc<treetop_core::PolicyEngine>,
+    engine_snapshot: &PreparedEvaluationSession,
     runtime: &AuthorizeRuntimeConfig,
     strict_schema: bool,
     schema_loaded: bool,
@@ -552,7 +552,7 @@ where
 /// Generic helper to evaluate batch requests and return results with counts
 fn evaluate_batch_requests<T, F>(
     requests: &[AuthRequest],
-    engine_snapshot: &std::sync::Arc<treetop_core::PolicyEngine>,
+    engine_snapshot: &PreparedEvaluationSession,
     parallel: &ParallelConfig,
     runtime: &AuthorizeRuntimeConfig,
     strict_schema: bool,
@@ -616,7 +616,7 @@ where
 #[doc(hidden)]
 pub fn evaluate_batch_requests_for_bench<T, F>(
     requests: &[AuthRequest],
-    engine_snapshot: &std::sync::Arc<treetop_core::PolicyEngine>,
+    engine_snapshot: &std::sync::Arc<PreparedEngine>,
     parallel: &ParallelConfig,
     map_fn: F,
 ) -> (Vec<IndexedResult<T>>, usize, usize)
@@ -626,7 +626,7 @@ where
 {
     evaluate_batch_requests(
         requests,
-        engine_snapshot,
+        &engine_snapshot.session(),
         parallel,
         &AuthorizeRuntimeConfig::default(),
         false,
@@ -679,8 +679,8 @@ pub async fn authorize(
         .insert(metrics::AcceptedAuthorizationBatch::new(req.requests.len()));
 
     let store = store.read()?;
-    let engine_snapshot = store.engine.clone();
-    let version = engine_snapshot.current_version();
+    let engine_snapshot = store.engine.session();
+    let version = engine_snapshot.version();
     let strict_schema = store.schema_validation_mode == SchemaValidationMode::Strict;
     let schema_loaded = !store.schema.content.is_empty();
 

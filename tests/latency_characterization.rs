@@ -173,7 +173,7 @@ fn simple_request(action: &str) -> Request {
     Request {
         principal: Principal::User(User::from_str("bench").unwrap()),
         action: Action::from_str(action).unwrap(),
-        resource: Resource::new("Photo", "bench"),
+        resource: Resource::new("Photo", "bench").unwrap(),
     }
 }
 
@@ -182,6 +182,7 @@ fn labeled_request(action: &str) -> Request {
         principal: Principal::User(User::from_str("bench").unwrap()),
         action: Action::from_str(action).unwrap(),
         resource: Resource::new("Host", "web-01.example.com")
+            .unwrap()
             .with_attr("name", AttrValue::String("web-01.example.com".to_owned())),
     }
 }
@@ -238,7 +239,7 @@ fn configured_concurrency(cpu_count: usize) -> Vec<usize> {
                 .collect::<Vec<_>>()
         })
         .filter(|values| !values.is_empty())
-        .unwrap_or_else(|| vec![1, cpu_count.min(8).max(1)]);
+        .unwrap_or_else(|| vec![1, cpu_count.clamp(1, 8)]);
     values.sort_unstable();
     values.dedup();
     values

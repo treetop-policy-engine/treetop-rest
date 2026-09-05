@@ -304,6 +304,17 @@ histogram_quantile(
   use `/livez` and `/readyz`.
 - Response: `{}` with HTTP 200.
 
+### Authorization state metadata
+
+Policy versions include `hash`, `loaded_at`, nullable `label_set`, and unsigned `generation`.
+Each authorization batch and every successful item use the same complete state version. `label_set`
+identifies the installed label configuration using the SHA-256 digest of its document; bundle documents
+use canonical JSON. `generation` is local to an engine instance and can restart when REST replaces it.
+Consumers comparing versions must include all four fields.
+
+Malformed principal/action/resource identities and IP attributes cause HTTP 400 during deserialization,
+rejecting the entire batch before evaluation. Evaluation-time failures still use failed per-item results.
+
 ### GET /api/v1/version
 
 - Purpose: version metadata for the server and policy engine.

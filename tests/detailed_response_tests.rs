@@ -34,7 +34,7 @@ permit (
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let auth_request = AuthorizeRequest::new().add_with_id("check-1", request);

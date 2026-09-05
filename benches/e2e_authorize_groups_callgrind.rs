@@ -48,7 +48,7 @@ fn build_request() -> AuthorizeRequest {
     let request = Request {
         principal: Principal::User(User::from_str(r#"DNS::User::"alice"[admins]"#).unwrap()),
         action: Action::from_str(r#"DNS::Action::"create_host""#).unwrap(),
-        resource: Resource::new("Host", "example"),
+        resource: Resource::new("Host", "example").unwrap(),
     };
     AuthorizeRequest::single(request)
 }

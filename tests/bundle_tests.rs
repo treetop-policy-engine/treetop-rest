@@ -7,7 +7,7 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 use tempfile::TempDir;
 use treetop_bundle::{BundleBuilder, SignaturePolicy, SigningKey, TrustStore, TrustedKey};
-use treetop_core::{Action, Decision, Principal, Request, Resource, User};
+use treetop_core::{Action, Principal, Request, Resource, User};
 use treetop_rest::config::{BundleEngineMode, BundleRuntimeConfig, Config};
 use treetop_rest::handlers;
 use treetop_rest::state::{PolicyStore, parse_labels};
@@ -140,21 +140,17 @@ async fn bundle_module_mode_builds_namespace_policy_stores() {
     assert_eq!(store_ids[0].as_str(), "dns");
     assert_eq!(store_ids[1].as_str(), "www");
     let request = Request {
-        principal: Principal::User(User::new(
-            "blocked",
-            None,
-            Some(vec!["Organization".to_string()]),
-        )),
+        principal: Principal::User(
+            User::new("blocked", None, Some(vec!["Organization".to_string()])).unwrap(),
+        ),
         action: Action::new(
             "read",
             Some(vec!["ExampleCo".to_string(), "DNS".to_string()]),
-        ),
-        resource: Resource::new("ExampleCo::DNS::Host", "host-1"),
+        )
+        .unwrap(),
+        resource: Resource::new("ExampleCo::DNS::Host", "host-1").unwrap(),
     };
-    assert!(matches!(
-        store.engine.evaluate(&request).unwrap(),
-        Decision::Deny { .. }
-    ));
+    assert!(!store.engine.evaluate(&request).unwrap().is_allowed());
 }
 
 #[actix_web::test]

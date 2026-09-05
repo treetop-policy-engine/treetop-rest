@@ -199,7 +199,7 @@ async fn test_metrics_has_policy_eval_metrics() {
     // Perform an evaluation to ensure metrics are generated
     let principal = Principal::User(User::from_str("User::\"alice\"").unwrap());
     let action = Action::from_str("Action::\"view\"").unwrap();
-    let resource = Resource::new("Photo", "VacationPhoto94.jpg");
+    let resource = Resource::new("Photo", "VacationPhoto94.jpg").unwrap();
 
     let check_req = Request {
         principal: principal.clone(),
@@ -283,7 +283,7 @@ async fn test_metrics_updated_after_evaluation() {
     // Perform an authorization check (alice viewing photo - should be allowed)
     let principal = Principal::User(User::from_str("User::\"alice\"").unwrap());
     let action = Action::from_str("Action::\"view\"").unwrap();
-    let resource = Resource::new("Photo", "VacationPhoto94.jpg");
+    let resource = Resource::new("Photo", "VacationPhoto94.jpg").unwrap();
 
     let check_req = Request {
         principal,
@@ -339,7 +339,7 @@ async fn test_metrics_tracks_allowed_and_denied() {
     // Perform an allowed evaluation (alice viewing photo)
     let principal_alice = Principal::User(User::from_str("User::\"alice\"").unwrap());
     let action_view = Action::from_str("Action::\"view\"").unwrap();
-    let resource = Resource::new("Photo", "VacationPhoto94.jpg");
+    let resource = Resource::new("Photo", "VacationPhoto94.jpg").unwrap();
 
     let check_req = Request {
         principal: principal_alice.clone(),
@@ -397,7 +397,7 @@ async fn test_metrics_prometheus_format() {
     // Perform an evaluation to ensure counter metrics are present
     let principal = Principal::User(User::from_str("User::\"alice\"").unwrap());
     let action = Action::from_str("Action::\"view\"").unwrap();
-    let resource = Resource::new("Photo", "VacationPhoto94.jpg");
+    let resource = Resource::new("Photo", "VacationPhoto94.jpg").unwrap();
 
     let check_req = Request {
         principal,
@@ -543,7 +543,7 @@ async fn test_metrics_has_histogram_buckets() {
     // Perform an evaluation to generate histogram data
     let principal = Principal::User(User::from_str("User::\"alice\"").unwrap());
     let action = Action::from_str("Action::\"view\"").unwrap();
-    let resource = Resource::new("Photo", "VacationPhoto94.jpg");
+    let resource = Resource::new("Photo", "VacationPhoto94.jpg").unwrap();
 
     let check_req = Request {
         principal,
@@ -663,7 +663,7 @@ async fn test_authorization_metrics_correlate_accepted_batch_size_and_exclude_re
     let check = Request {
         principal: Principal::User(User::from_str("User::\"alice\"").unwrap()),
         action: Action::from_str("Action::\"view\"").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let req = test::TestRequest::post()
