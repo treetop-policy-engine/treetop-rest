@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.16] - 2026-09-06
+
 ### Changed
 
 - Refresh Rust dependencies in both committed lockfiles and pin GitHub Actions to
