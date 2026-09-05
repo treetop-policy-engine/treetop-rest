@@ -15,7 +15,6 @@ use futures_util::{StreamExt, stream};
 use serde::Serialize;
 use serde_json::Value;
 use tokio::sync::watch;
-use treetop_core::Decision;
 use treetop_core::bench_helpers::policy_scale::{
     CORPUS_VERSION, REVIEWERS_GROUP, ScaleCorpus, TARGET_USER, allow_request,
     configured_policy_count, forbid_request, group_request, no_match_request,
@@ -235,22 +234,34 @@ fn initialize_store(corpus: &ScaleCorpus) -> PolicyStore {
 }
 
 fn assert_shared_decisions(store: &PolicyStore) {
-    assert!(matches!(
-        store.engine.evaluate(&allow_request()),
-        Ok(Decision::Allow { .. })
-    ));
-    assert!(matches!(
-        store.engine.evaluate(&forbid_request()),
-        Ok(Decision::Deny { .. })
-    ));
-    assert!(matches!(
-        store.engine.evaluate(&group_request()),
-        Ok(Decision::Allow { .. })
-    ));
-    assert!(matches!(
-        store.engine.evaluate(&no_match_request()),
-        Ok(Decision::Deny { .. })
-    ));
+    assert!(
+        store
+            .engine
+            .evaluate(&allow_request())
+            .unwrap()
+            .is_allowed()
+    );
+    assert!(
+        !store
+            .engine
+            .evaluate(&forbid_request())
+            .unwrap()
+            .is_allowed()
+    );
+    assert!(
+        store
+            .engine
+            .evaluate(&group_request())
+            .unwrap()
+            .is_allowed()
+    );
+    assert!(
+        !store
+            .engine
+            .evaluate(&no_match_request())
+            .unwrap()
+            .is_allowed()
+    );
 }
 
 fn workloads() -> Vec<Workload> {

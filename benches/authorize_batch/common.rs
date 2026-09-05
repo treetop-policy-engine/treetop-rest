@@ -28,7 +28,7 @@ permit (
 when { resource.ip.isInRange(ip("10.0.0.0/24")) };
 "#;
 
-fn build_engine() -> Arc<treetop_core::PolicyEngine> {
+fn build_engine() -> Arc<treetop_bundle::PreparedEngine> {
     let mut store = PolicyStore::new().unwrap();
     store.set_dsl(DSL, None, None).unwrap();
     store.engine.clone()
@@ -49,7 +49,7 @@ fn build_requests(count: usize) -> Vec<AuthRequest> {
             let request = Request {
                 principal: principal.clone(),
                 action,
-                resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+                resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
             };
             AuthRequest::new(request)
         })
@@ -57,7 +57,7 @@ fn build_requests(count: usize) -> Vec<AuthRequest> {
 }
 
 pub struct BatchContext {
-    engine: Arc<treetop_core::PolicyEngine>,
+    engine: Arc<treetop_bundle::PreparedEngine>,
     parallel: ParallelConfig,
     requests: Vec<AuthRequest>,
 }

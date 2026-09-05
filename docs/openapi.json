@@ -1113,7 +1113,7 @@
                 ]
               },
               "value": {
-                "type": "string"
+                "$ref": "#/components/schemas/CedarIp"
               }
             }
           },
@@ -1420,6 +1420,10 @@
           }
         }
       },
+      "CedarIp": {
+        "type": "string",
+        "description": "An IP address or network accepted by Cedar's `ip()` extension."
+      },
       "Core": {
         "type": "object",
         "required": [
@@ -1575,6 +1579,9 @@
           }
         ],
         "description": "A single result from a batch operation with its original index and optional client ID"
+      },
+      "LabelSetVersion": {
+        "type": "string"
       },
       "Metadata_OfLabels": {
         "type": "object",
@@ -1865,15 +1872,32 @@
       },
       "PolicyVersion": {
         "type": "object",
-        "description": "Version metadata for the policy set used during an evaluation.",
+        "description": "Version metadata for the complete engine state used during an evaluation.",
         "required": [
           "hash",
           "loaded_at"
         ],
         "properties": {
+          "generation": {
+            "type": "integer",
+            "format": "int64",
+            "description": "Monotonic generation within this engine instance.",
+            "minimum": 0
+          },
           "hash": {
             "type": "string",
             "description": "Hash of the policy source (e.g. SHA-256 of the policy text)."
+          },
+          "label_set": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "$ref": "#/components/schemas/LabelSetVersion",
+                "description": "Application-defined label-set version, when the installed registry has one."
+              }
+            ]
           },
           "loaded_at": {
             "type": "string",
@@ -1910,7 +1934,7 @@
       },
       "QualifiedId": {
         "type": "object",
-        "description": "A fully‐qualified identifier, with zero runtime cost over `(Vec<String>, String)`.",
+        "description": "A fully qualified, validated identifier with its parsed Cedar UID cached.",
         "required": [
           "id",
           "namespace"

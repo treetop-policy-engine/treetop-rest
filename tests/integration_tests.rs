@@ -2,7 +2,7 @@
 use rstest::rstest;
 use std::str::FromStr;
 use std::sync::{Arc, RwLock};
-use treetop_core::{Action, AttrValue, Decision, Principal, Request, Resource, User};
+use treetop_core::{Action, AttrValue, Principal, Request, Resource, User};
 use treetop_rest::state::PolicyStore;
 
 const TEST_POLICIES: &str = include_str!("../testdata/default.cedar");
@@ -84,14 +84,14 @@ fn test_basic_authorization(
     let request = Request {
         principal: Principal::User(User::from_str(user).unwrap()),
         action: Action::from_str(action).unwrap(),
-        resource: Resource::new(resource_type, resource_id),
+        resource: Resource::new(resource_type, resource_id).unwrap(),
     };
 
     let decision = guard.engine.evaluate(&request).unwrap();
 
     match expected {
-        ExpectedDecision::Allow => assert!(matches!(decision, Decision::Allow { .. })),
-        ExpectedDecision::Deny => assert!(matches!(decision, Decision::Deny { .. })),
+        ExpectedDecision::Allow => assert!(decision.is_allowed()),
+        ExpectedDecision::Deny => assert!(!decision.is_allowed()),
     }
 }
 
@@ -109,8 +109,9 @@ fn test_ip_range_authorization(
     let store = create_store_with_test_data();
     let guard = store.read().unwrap();
 
-    let resource =
-        Resource::new("Host", "myhost.example.com").with_attr("ip", AttrValue::Ip(ip.to_string()));
+    let resource = Resource::new("Host", "myhost.example.com")
+        .unwrap()
+        .with_attr("ip", AttrValue::ip(ip).unwrap());
 
     let request = Request {
         principal: Principal::User(User::from_str(user).unwrap()),
@@ -121,8 +122,8 @@ fn test_ip_range_authorization(
     let decision = guard.engine.evaluate(&request).unwrap();
 
     match expected {
-        ExpectedDecision::Allow => assert!(matches!(decision, Decision::Allow { .. })),
-        ExpectedDecision::Deny => assert!(matches!(decision, Decision::Deny { .. })),
+        ExpectedDecision::Allow => assert!(decision.is_allowed()),
+        ExpectedDecision::Deny => assert!(!decision.is_allowed()),
     }
 }
 
@@ -132,7 +133,7 @@ fn test_alice_create_host_with_label() {
     let guard = store.read().unwrap();
 
     // Create a host with a name that matches "in_domain" pattern
-    let mut resource = Resource::new("Host", "web-server.example.com");
+    let mut resource = Resource::new("Host", "web-server.example.com").unwrap();
     resource = resource.with_attr("name", AttrValue::String("server.example.com".to_string()));
 
     let request = Request {
@@ -146,7 +147,7 @@ fn test_alice_create_host_with_label() {
     let decision = guard.engine.evaluate(&request).unwrap();
     // The decision depends on whether labels are properly applied
     // This test verifies the evaluation runs without error
-    assert!(matches!(decision, Decision::Allow { .. }));
+    assert!(decision.is_allowed());
 }
 
 #[test]
@@ -245,17 +246,17 @@ fn test_batch_evaluation() {
         Request {
             principal: Principal::User(User::from_str("alice").unwrap()),
             action: Action::from_str("view").unwrap(),
-            resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+            resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
         },
         Request {
             principal: Principal::User(User::from_str("alice").unwrap()),
             action: Action::from_str("edit").unwrap(),
-            resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+            resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
         },
         Request {
             principal: Principal::User(User::from_str("alice").unwrap()),
             action: Action::from_str("delete").unwrap(),
-            resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+            resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
         },
     ];
 
@@ -266,9 +267,9 @@ fn test_batch_evaluation() {
         .collect();
 
     // First should be Allow, others should be Deny
-    assert!(matches!(results[0], Ok(Decision::Allow { .. })));
-    assert!(matches!(results[1], Ok(Decision::Deny { .. })));
-    assert!(matches!(results[2], Ok(Decision::Deny { .. })));
+    assert!(results[0].as_ref().unwrap().is_allowed());
+    assert!(!results[1].as_ref().unwrap().is_allowed());
+    assert!(!results[2].as_ref().unwrap().is_allowed());
 }
 
 #[test]
@@ -281,18 +282,19 @@ fn test_batch_with_mixed_results() {
         Request {
             principal: Principal::User(User::from_str("alice").unwrap()),
             action: Action::from_str("only_here").unwrap(),
-            resource: Resource::new("AnyType", "anyid"),
+            resource: Resource::new("AnyType", "anyid").unwrap(),
         },
         Request {
             principal: Principal::User(User::from_str("bob").unwrap()),
             action: Action::from_str("only_here").unwrap(),
-            resource: Resource::new("AnyType", "anyid"),
+            resource: Resource::new("AnyType", "anyid").unwrap(),
         },
         Request {
             principal: Principal::User(User::from_str("bob").unwrap()),
             action: Action::from_str("create_host").unwrap(),
             resource: Resource::new("Host", "myhost.example.com")
-                .with_attr("ip", AttrValue::Ip("10.0.0.5".to_string())),
+                .unwrap()
+                .with_attr("ip", AttrValue::ip("10.0.0.5").unwrap()),
         },
     ];
 
@@ -306,9 +308,9 @@ fn test_batch_with_mixed_results() {
     assert!(results.iter().all(|r| r.is_ok()));
 
     // Check expected outcomes
-    assert!(matches!(results[0], Ok(Decision::Allow { .. }))); // alice only_here
-    assert!(matches!(results[1], Ok(Decision::Deny { .. }))); // bob only_here
-    assert!(matches!(results[2], Ok(Decision::Allow { .. }))); // bob create_host with valid IP
+    assert!(results[0].as_ref().unwrap().is_allowed()); // alice only_here
+    assert!(!results[1].as_ref().unwrap().is_allowed()); // bob only_here
+    assert!(results[2].as_ref().unwrap().is_allowed()); // bob create_host with valid IP
 }
 
 #[test]
@@ -323,7 +325,7 @@ fn test_batch_consistency() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     // Evaluate the same request multiple times
@@ -331,13 +333,8 @@ fn test_batch_consistency() {
 
     // All results should be identical and match the same version
     for result in &results {
-        assert!(result.is_ok());
-        if let Ok(Decision::Allow {
-            version: result_version,
-            ..
-        }) = result
-        {
-            assert_eq!(*result_version, version);
-        }
+        let decision = result.as_ref().unwrap();
+        assert!(decision.is_allowed());
+        assert_eq!(decision.version(), &version);
     }
 }

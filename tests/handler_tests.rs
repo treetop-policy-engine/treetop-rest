@@ -1,4 +1,5 @@
 use actix_web::{App, http::StatusCode, http::header, test, web};
+use futures_util::FutureExt;
 use rstest::rstest;
 use std::collections::HashMap;
 use std::str::FromStr;
@@ -135,9 +136,13 @@ async fn test_livez_endpoint_is_dependency_free() {
     )
     .await;
 
-    let _write_guard = store.write().unwrap();
+    let write_guard = store.write().unwrap();
     let req = test::TestRequest::get().uri("/livez").to_request();
-    let resp = test::call_service(&app, req).await;
+    // A health probe must complete immediately while another operation owns the store.
+    let resp = test::call_service(&app, req)
+        .now_or_never()
+        .expect("livez must not wait for the policy store");
+    drop(write_guard);
 
     assert_eq!(resp.status(), StatusCode::OK);
     assert_eq!(
@@ -207,9 +212,13 @@ async fn test_readyz_fails_fast_while_store_is_busy() {
     )
     .await;
 
-    let _write_guard = store.write().unwrap();
+    let write_guard = store.write().unwrap();
     let req = test::TestRequest::get().uri("/readyz").to_request();
-    let resp = test::call_service(&app, req).await;
+    // A health probe must complete immediately while another operation owns the store.
+    let resp = test::call_service(&app, req)
+        .now_or_never()
+        .expect("readyz must not wait for the policy store");
+    drop(write_guard);
 
     assert_eq!(resp.status(), StatusCode::SERVICE_UNAVAILABLE);
 }
@@ -326,7 +335,7 @@ async fn test_check_endpoint_allow() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let auth_request = AuthorizeRequest::single(request);
@@ -363,7 +372,7 @@ async fn test_authorize_rejects_batch_over_configured_limit() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
     let auth_request = AuthorizeRequest::from_requests([request.clone(), request]);
 
@@ -394,7 +403,7 @@ async fn test_check_endpoint_deny() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("edit").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let auth_request = AuthorizeRequest::single(request);
@@ -424,7 +433,8 @@ async fn test_check_endpoint_with_attributes() {
     .await;
 
     let resource = Resource::new("Host", "myhost.example.com")
-        .with_attr("ip", AttrValue::Ip("10.0.0.5".to_string()));
+        .unwrap()
+        .with_attr("ip", AttrValue::ip("10.0.0.5").unwrap());
 
     let request = Request {
         principal: Principal::User(User::from_str("bob").unwrap()),
@@ -459,7 +469,8 @@ async fn test_check_endpoint_deny_out_of_range() {
     .await;
 
     let resource = Resource::new("Host", "myhost.example.com")
-        .with_attr("ip", AttrValue::Ip("192.168.1.5".to_string()));
+        .unwrap()
+        .with_attr("ip", AttrValue::ip("192.168.1.5").unwrap());
 
     let request = Request {
         principal: Principal::User(User::from_str("bob").unwrap()),
@@ -498,7 +509,7 @@ async fn test_check_endpoint_with_request_context() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
     let mut context = HashMap::new();
     context.insert("env".to_string(), AttrValue::String("prod".to_string()));
@@ -537,7 +548,7 @@ async fn test_check_endpoint_rejects_context_without_schema_in_strict_mode() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
     let mut context = HashMap::new();
     context.insert("env".to_string(), AttrValue::String("prod".to_string()));
@@ -1024,13 +1035,13 @@ async fn test_authorize_endpoint_brief() {
     let request1 = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let request2 = Request {
         principal: Principal::User(User::from_str("bob").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let auth_request = AuthorizeRequest::with_ids([("check-1", request1), ("check-2", request2)]);
@@ -1077,7 +1088,7 @@ async fn test_authorize_endpoint_detailed() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let auth_request = AuthorizeRequest::new().add_with_id("check-1", request);
@@ -1117,7 +1128,7 @@ async fn test_brief_and_detailed_both_allow() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     // Test brief
@@ -1169,7 +1180,7 @@ async fn test_brief_and_detailed_both_deny() {
     let request = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("edit").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     // Test brief
@@ -1219,7 +1230,8 @@ async fn test_brief_and_detailed_with_attributes_allow() {
     .await;
 
     let resource = Resource::new("Host", "myhost.example.com")
-        .with_attr("ip", AttrValue::Ip("10.0.0.5".to_string()));
+        .unwrap()
+        .with_attr("ip", AttrValue::ip("10.0.0.5").unwrap());
 
     let request = Request {
         principal: Principal::User(User::from_str("bob").unwrap()),
@@ -1274,7 +1286,8 @@ async fn test_brief_and_detailed_with_attributes_deny() {
     .await;
 
     let resource = Resource::new("Host", "myhost.example.com")
-        .with_attr("ip", AttrValue::Ip("192.168.1.5".to_string()));
+        .unwrap()
+        .with_attr("ip", AttrValue::ip("192.168.1.5").unwrap());
 
     let request = Request {
         principal: Principal::User(User::from_str("bob").unwrap()),
@@ -1331,19 +1344,19 @@ async fn test_brief_and_detailed_batch_consistency() {
     let request1 = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let request2 = Request {
         principal: Principal::User(User::from_str("alice").unwrap()),
         action: Action::from_str("edit").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     let request3 = Request {
         principal: Principal::User(User::from_str("bob").unwrap()),
         action: Action::from_str("view").unwrap(),
-        resource: Resource::new("Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Photo", "VacationPhoto94.jpg").unwrap(),
     };
 
     // Test brief
@@ -1414,5 +1427,44 @@ async fn test_brief_and_detailed_batch_consistency() {
     match brief_results[2].result() {
         BatchResult::Success { data } => assert!(matches!(data.decision, DecisionBrief::Deny)),
         _ => panic!("Expected Deny for third request"),
+    }
+}
+
+#[actix_web::test]
+async fn malformed_identity_and_ip_reject_the_entire_batch() {
+    let store = create_test_store();
+    let version = store.read().unwrap().engine.current_version();
+    let app = test::init_service(
+        App::new()
+            .app_data(web::Data::new(Arc::clone(&store)))
+            .app_data(web::Data::new(create_test_parallel_config()))
+            .route("/api/v1/authorize", web::post().to(handlers::authorize)),
+    )
+    .await;
+    let valid = serde_json::json!({
+        "principal": {"User": {"id": "alice", "namespace": [], "groups": []}},
+        "action": {"id": "view", "namespace": []},
+        "resource": {"kind": "Photo", "id": "VacationPhoto94.jpg", "attrs": {}},
+    });
+    for pointer in [
+        "/principal/User/id",
+        "/action/id",
+        "/resource/id",
+        "/resource/kind",
+        "/resource/attrs/ip",
+    ] {
+        let mut invalid = valid.clone();
+        if pointer == "/resource/attrs/ip" {
+            invalid["resource"]["attrs"]["ip"] = serde_json::json!({"Ip": "not-an-ip"});
+        } else {
+            *invalid.pointer_mut(pointer).unwrap() = serde_json::json!("");
+        }
+        let request = test::TestRequest::post()
+            .uri("/api/v1/authorize")
+            .set_json(serde_json::json!({"requests": [valid.clone(), invalid]}))
+            .to_request();
+        let response = test::call_service(&app, request).await;
+        assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{pointer}");
+        assert_eq!(store.read().unwrap().engine.current_version(), version);
     }
 }

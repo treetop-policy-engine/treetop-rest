@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refresh Rust dependencies in both committed lockfiles and pin GitHub Actions to
+  their latest stable releases before publication; preserve compatibility requirements.
+
+- Adopt Core 0.0.25 and Bundle's explicit `PreparedEngine` schema modes. Strict and permissive policy loading
+  retain their existing behavior, and each authorization batch captures one frozen evaluation session.
+- Authorization and version responses now include nullable `label_set` and unsigned `generation` metadata.
+  Label identifiers use the SHA-256 digest of the loaded label document (canonical JSON for bundles) and survive
+  engine replacement. Generation is local to one engine instance and can restart when an engine is replaced.
+- Label rules for different resource kinds can share one output owner; invalid or reserved outputs reject the
+  replacement before publication. Failed label reloads leave the active engine and metadata intact.
+- **Breaking:** malformed identities and IP values now fail during JSON deserialization with HTTP 400, rejecting
+  the whole batch. Callers must validate/fix those inputs rather than expecting a per-item evaluation failure.
+- Rust callers must handle fallible request constructors, use `AttrValue::ip`, and adopt `PreparedEngine` for
+  store engines. REST decision field names and Allow/Deny values remain stable; conversion uses Core accessors.
+
 ## [0.0.15] - 2026-08-30
 
 ### Added

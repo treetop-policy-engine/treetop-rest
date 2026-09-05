@@ -44,7 +44,7 @@ fn build_request() -> AuthorizeRequest {
     let request = Request {
         principal: Principal::User(User::from_str(r#"Org::Dept::Team::User::"alice""#).unwrap()),
         action: Action::from_str(r#"Org::Dept::Team::Action::"view""#).unwrap(),
-        resource: Resource::new("Org::Dept::Team::Photo", "VacationPhoto94.jpg"),
+        resource: Resource::new("Org::Dept::Team::Photo", "VacationPhoto94.jpg").unwrap(),
     };
     AuthorizeRequest::single(request)
 }

@@ -67,17 +67,17 @@ pub struct AuthorizeDecisionDetailed {
 impl From<Decision> for AuthorizeDecisionDetailed {
     /// Convert a core Decision into a detailed AuthorizeDecisionDetailed
     fn from(decision: Decision) -> Self {
-        match decision {
-            Decision::Allow { policies, version } => AuthorizeDecisionDetailed {
-                policy: policies.into_inner(),
-                decision: DecisionBrief::Allow,
-                version,
+        AuthorizeDecisionDetailed {
+            policy: decision
+                .permit_policies()
+                .map(|policies| policies.clone().into_inner())
+                .unwrap_or_default(),
+            decision: if decision.is_allowed() {
+                DecisionBrief::Allow
+            } else {
+                DecisionBrief::Deny
             },
-            Decision::Deny { version } => AuthorizeDecisionDetailed {
-                policy: vec![],
-                decision: DecisionBrief::Deny,
-                version,
-            },
+            version: decision.version().clone(),
         }
     }
 }
@@ -100,17 +100,17 @@ pub struct AuthorizeDecisionBrief {
 impl From<Decision> for AuthorizeDecisionBrief {
     /// Convert a core Decision into a brief AuthorizeDecisionBrief
     fn from(decision: Decision) -> Self {
-        match decision {
-            Decision::Allow { version, policies } => AuthorizeDecisionBrief {
-                decision: DecisionBrief::Allow,
-                version,
-                policy_id: policies.ids().join("; "),
+        AuthorizeDecisionBrief {
+            policy_id: decision
+                .permit_policies()
+                .map(|policies| policies.ids().join("; "))
+                .unwrap_or_default(),
+            decision: if decision.is_allowed() {
+                DecisionBrief::Allow
+            } else {
+                DecisionBrief::Deny
             },
-            Decision::Deny { version, .. } => AuthorizeDecisionBrief {
-                decision: DecisionBrief::Deny,
-                version,
-                policy_id: String::new(),
-            },
+            version: decision.version().clone(),
         }
     }
 }
@@ -330,11 +330,11 @@ pub struct UserPolicies {
     pub matches: Vec<PolicyMatch>,
 }
 
-impl TryFrom<treetop_core::UserPolicies> for UserPolicies {
+impl TryFrom<treetop_core::PolicyCandidates> for UserPolicies {
     type Error = crate::errors::ServiceError;
 
     /// Convert core UserPolicies into a serializable UserPolicies
-    fn try_from(user_policies: treetop_core::UserPolicies) -> Result<Self, Self::Error> {
+    fn try_from(user_policies: treetop_core::PolicyCandidates) -> Result<Self, Self::Error> {
         let policies = user_policies
             .policies()
             .iter()
@@ -438,9 +438,9 @@ impl AuthorizeRequest {
     /// ```
     /// use treetop_core::{Action, Principal, Request, Resource, User};
     /// let request = Request {
-    ///     principal: Principal::User(User::new("alice", None, None)),
-    ///     action: Action::new("view", None),
-    ///     resource: Resource::new("Photo", "photo.jpg"),
+    ///     principal: Principal::User(User::new("alice", None, None).unwrap()),
+    ///     action: Action::new("view", None).unwrap(),
+    ///     resource: Resource::new("Photo", "photo.jpg").unwrap(),
     /// };
     /// let auth_req = treetop_rest::models::AuthorizeRequest::new().add_request(request);
     /// assert_eq!(auth_req.requests.len(), 1);
@@ -458,9 +458,9 @@ impl AuthorizeRequest {
     /// ```
     /// use treetop_core::{Action, Principal, Request, Resource, User};
     /// let request = Request {
-    ///     principal: Principal::User(User::new("alice", None, None)),
-    ///     action: Action::new("view", None),
-    ///     resource: Resource::new("Photo", "photo.jpg"),
+    ///     principal: Principal::User(User::new("alice", None, None).unwrap()),
+    ///     action: Action::new("view", None).unwrap(),
+    ///     resource: Resource::new("Photo", "photo.jpg").unwrap(),
     /// };
     /// let auth_req = treetop_rest::models::AuthorizeRequest::new()
     ///     .add_with_id("req-1", request);

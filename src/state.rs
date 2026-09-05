@@ -11,7 +11,7 @@ use std::marker::PhantomData;
 use std::num::NonZeroUsize;
 use std::sync::{Arc, Mutex, RwLock};
 use tracing::{debug, warn};
-use treetop_bundle::{LabelSet, ValidatedBundle};
+use treetop_bundle::{LabelSet, PreparedEngine, ValidatedBundle};
 use treetop_core::{LabelRegistryBuilder, Labeler, PolicyEngine};
 use utoipa::ToSchema;
 
@@ -241,7 +241,7 @@ impl MetadataParser for OfSchema {
 }
 
 pub struct PolicyStore {
-    pub engine: Arc<PolicyEngine>,
+    pub engine: Arc<PreparedEngine>,
     pub allow_upload: bool,
     pub upload_token: Option<String>,
     pub schema_validation_mode: SchemaValidationMode,
@@ -297,7 +297,7 @@ impl RemoteSourceStatus {
 }
 
 pub struct PreparedBundle {
-    engine: Arc<PolicyEngine>,
+    engine: Arc<PreparedEngine>,
     policies: Metadata<OfPolicies>,
     labels: Metadata<OfLabels>,
     schema: Metadata<OfSchema>,
@@ -328,7 +328,9 @@ impl Default for PolicyStore {
     fn default() -> Self {
         Self {
             engine: Arc::new(
-                PolicyEngine::new_from_str("").expect("Failed to initialize policy engine"),
+                PolicyEngine::new_from_str("")
+                    .expect("Failed to initialize policy engine")
+                    .into(),
             ),
             allow_upload: false,
             upload_token: None,
@@ -356,7 +358,9 @@ impl PolicyStore {
     pub fn new() -> Result<Self, ServiceError> {
         Ok(Self {
             engine: Arc::new(
-                PolicyEngine::new_from_str("").expect("Failed to initialize policy engine"),
+                PolicyEngine::new_from_str("")
+                    .expect("Failed to initialize policy engine")
+                    .into(),
             ),
             allow_upload: false,
             upload_token: None,
@@ -553,18 +557,21 @@ impl PolicyStore {
         dsl: &str,
         schema: Option<CedarSchema>,
         labelers: &[Arc<dyn Labeler>],
-    ) -> Result<PolicyEngine, ServiceError> {
+        label_version: &str,
+    ) -> Result<PreparedEngine, ServiceError> {
         let mut engine = match schema {
-            Some(schema) => PolicyEngine::new_from_str_with_schema(dsl, schema)?,
-            None => PolicyEngine::new_from_str(dsl)?,
+            Some(schema) => {
+                PreparedEngine::from(PolicyEngine::new_from_str_with_schema(dsl, schema)?)
+            }
+            None => PreparedEngine::from(PolicyEngine::new_from_str(dsl)?),
         };
 
         if !labelers.is_empty() {
-            let mut builder = LabelRegistryBuilder::new();
+            let mut builder = LabelRegistryBuilder::versioned(label_version);
             for labeler in labelers {
                 builder = builder.add_labeler(Arc::clone(labeler));
             }
-            engine = engine.with_label_registry(builder.build());
+            engine = engine.with_label_registry(builder.build()?);
         }
 
         Ok(engine)
@@ -575,9 +582,10 @@ impl PolicyStore {
         dsl: &str,
         schema: Option<CedarSchema>,
         labelers: &[Arc<dyn Labeler>],
+        label_version: &str,
     ) -> Result<(), ServiceError> {
         let (runtime_schema, request_context_status) = self.runtime_schema_for_dsl(dsl, schema)?;
-        let engine = Self::build_engine_from_parts(dsl, runtime_schema, labelers)?;
+        let engine = Self::build_engine_from_parts(dsl, runtime_schema, labelers, label_version)?;
         self.engine = Arc::new(engine);
         self.request_context_status = request_context_status;
         Ok(())
@@ -598,7 +606,8 @@ impl PolicyStore {
         let metadata = Metadata::<OfPolicies>::new(dsl.to_string(), source, refresh_frequency)?;
         let schema = self.current_schema()?;
         let labelers = self.label_registry_labelers.clone();
-        self.rebuild_engine_for_dsl_with_parts(dsl, schema, &labelers)?;
+        let label_version = self.labels.sha256.clone();
+        self.rebuild_engine_for_dsl_with_parts(dsl, schema, &labelers, &label_version)?;
         self.policies = metadata;
         self.bundle = None;
         self.clear_list_policies_cache()?;
@@ -635,7 +644,13 @@ impl PolicyStore {
         }
         let dsl = self.policies.content.clone();
         let labelers = self.label_registry_labelers.clone();
-        self.rebuild_engine_for_dsl_with_parts(&dsl, Some(parsed_schema), &labelers)?;
+        let label_version = self.labels.sha256.clone();
+        self.rebuild_engine_for_dsl_with_parts(
+            &dsl,
+            Some(parsed_schema),
+            &labelers,
+            &label_version,
+        )?;
 
         self.schema = metadata;
         self.bundle = None;
@@ -666,7 +681,7 @@ impl PolicyStore {
         let labelers = label_set.to_labelers();
         let dsl = self.policies.content.clone();
         let schema = self.current_schema()?;
-        self.rebuild_engine_for_dsl_with_parts(&dsl, schema, &labelers)?;
+        self.rebuild_engine_for_dsl_with_parts(&dsl, schema, &labelers, &metadata.sha256)?;
 
         self.label_registry_labelers = labelers;
         self.labels = metadata;
@@ -837,7 +852,7 @@ impl PolicyStore {
     fn list_policies_for_key(
         &self,
         key: &ListPoliciesCacheKey,
-    ) -> Result<treetop_core::UserPolicies, ServiceError> {
+    ) -> Result<treetop_core::PolicyCandidates, ServiceError> {
         let namespace: Vec<&str> = key.namespaces.iter().map(|s| s.as_str()).collect();
         let group_refs: Vec<&str> = key.groups.iter().map(|s| s.as_str()).collect();
         Ok(self
@@ -887,7 +902,7 @@ impl ListPoliciesCacheKey {
     }
 }
 
-fn format_policies_raw(policies: &treetop_core::UserPolicies) -> String {
+fn format_policies_raw(policies: &treetop_core::PolicyCandidates) -> String {
     let mut content = String::new();
     for (index, policy) in policies.policies().iter().enumerate() {
         if index > 0 {
@@ -915,7 +930,7 @@ mod tests {
     fn schema_free_prepared_bundle() -> PreparedBundle {
         let policies = "permit (principal, action, resource);";
         PreparedBundle {
-            engine: Arc::new(PolicyEngine::new_from_str(policies).unwrap()),
+            engine: Arc::new(PolicyEngine::new_from_str(policies).unwrap().into()),
             policies: Metadata::<OfPolicies>::new(policies.to_string(), None, None).unwrap(),
             labels: Metadata::<OfLabels>::new(String::new(), None, None).unwrap(),
             schema: Metadata::<OfSchema>::new(String::new(), None, None).unwrap(),
@@ -1012,6 +1027,42 @@ permit (
     ]
   }
 ]"#;
+
+    #[test]
+    fn label_versions_survive_policy_replacement_and_failed_label_reload() {
+        let mut store = PolicyStore::new().unwrap();
+        store
+            .set_dsl("permit(principal, action, resource);", None, None)
+            .unwrap();
+        store.set_labels(LABELS_JSON, None, None).unwrap();
+        let before = store.engine.current_version();
+        assert_eq!(
+            before.label_set.as_ref().unwrap().as_str(),
+            store.labels.sha256
+        );
+        let session = store.engine.session();
+
+        store
+            .set_dsl("forbid(principal, action, resource);", None, None)
+            .unwrap();
+        assert_eq!(store.engine.current_version().label_set, before.label_set);
+        assert_eq!(session.version(), before);
+
+        let changed = LABELS_JSON.replace("^Vacation.*", "^Work.*");
+        store.set_labels(&changed, None, None).unwrap();
+        let after = store.engine.current_version();
+        assert_ne!(after.label_set, before.label_set);
+        assert_eq!(
+            after.label_set.as_ref().unwrap().as_str(),
+            store.labels.sha256
+        );
+
+        let invalid = changed.replace("nameLabels", "id");
+        assert!(store.set_labels(&invalid, None, None).is_err());
+        assert_eq!(store.engine.current_version(), after);
+        assert_eq!(store.labels.content, changed);
+        assert_eq!(session.version(), before);
+    }
 
     #[test]
     fn test_metadata_empty() {
