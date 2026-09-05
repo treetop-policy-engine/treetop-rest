@@ -3907,7 +3907,7 @@ dependencies = [
 
 [[package]]
 name = "treetop-rest"
-version = "0.0.15"
+version = "0.0.16"
 dependencies = [
  "actix-service",
  "actix-web",
