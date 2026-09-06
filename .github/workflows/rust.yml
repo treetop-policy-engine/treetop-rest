@@ -134,7 +134,7 @@ jobs:
       - name: Build native binaries
         run: |
           for TGT in x86_64-unknown-linux-musl aarch64-unknown-linux-musl; do
-            CARGO_TARGET_DIR="target/cross-$TGT" cross build --release --target "$TGT"
+            CARGO_TARGET_DIR="target/cross-$TGT" cross build --locked --release --target "$TGT"
           done
 
       - name: Package artifacts

@@ -20,7 +20,6 @@ RUN apk add --no-cache \
     git
 
 COPY Cargo.toml Cargo.lock ./
-COPY .cargo ./.cargo
 COPY src ./src
 COPY build.rs ./
 COPY benches ./benches

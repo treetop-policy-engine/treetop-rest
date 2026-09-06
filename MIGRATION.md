@@ -38,12 +38,11 @@ intact. Existing sessions retain their complete original generation.
 - Require status `request_limits` and `request_context`; `max_batch_size` is present.
 - Regenerate client types from the checked-in OpenAPI and upgrade all SDKs.
 
-## Candidate verification
+## Published dependencies
 
-Cargo configuration pins exact unmerged Core and Bundle revisions for integration
-and reproducible CI. After approval, publish Core and Bundle in that order, switch
-candidate patches to registry releases, refresh lockfiles, and repeat verification
-before releasing REST and its consumers. Do not merge or release before approval.
+REST requires Core 0.1.0 and Bundle 0.1.0 from crates.io. Both the application and
+fuzz lockfiles use registry sources without candidate Git patches. Release Core,
+then Bundle, then REST before upgrading SDKs and their consumers.
 
 The version endpoint reports REST and Core package versions without a `v` prefix
 or Git description suffix. Policy versions require all four state fields; the
