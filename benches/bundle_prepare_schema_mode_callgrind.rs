@@ -24,7 +24,7 @@ fn setup() -> ValidatedBundle {
     fs::write(
         root.join("treetop-module.toml"),
         r#"
-format_version = 1
+format_version = 2
 name = "benchmark"
 namespace = "Benchmark"
 policies = ["policy.cedar"]
@@ -35,7 +35,7 @@ policies = ["policy.cedar"]
     fs::write(
         &manifest,
         r#"
-format_version = 1
+format_version = 2
 name = "benchmark"
 
 [[modules]]

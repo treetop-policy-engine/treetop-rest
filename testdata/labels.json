@@ -1,8 +1,6 @@
 [
     {
-        "kind": "Host",
-        "field": "name",
-        "output": "nameLabels",
+        "target": {"resource_type": "Host", "attribute": "nameLabels"}, "field": "name",
         "patterns": [
             {
                 "name": "in_domain",

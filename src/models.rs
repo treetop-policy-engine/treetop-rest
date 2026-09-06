@@ -119,16 +119,13 @@ impl From<Decision> for AuthorizeDecisionBrief {
 pub struct StatusResponse {
     pub policy_configuration: PoliciesMetadata,
     pub parallel_configuration: ParallelConfig,
-    #[serde(default)]
     pub request_limits: RequestLimits,
-    #[serde(default)]
     pub request_context: RequestContextStatus,
 }
 
 #[derive(Serialize, ToSchema, Deserialize, Clone, Copy)]
 pub struct RequestLimits {
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub max_batch_size: Option<usize>,
+    pub max_batch_size: usize,
     pub max_context_bytes: usize,
     pub max_context_depth: usize,
     pub max_context_keys: usize,
@@ -137,7 +134,7 @@ pub struct RequestLimits {
 impl Default for RequestLimits {
     fn default() -> Self {
         Self {
-            max_batch_size: None,
+            max_batch_size: 1024,
             max_context_bytes: 16 * 1024,
             max_context_depth: 8,
             max_context_keys: 64,
@@ -333,7 +330,7 @@ pub struct UserPolicies {
 impl TryFrom<treetop_core::PolicyCandidates> for UserPolicies {
     type Error = crate::errors::ServiceError;
 
-    /// Convert core UserPolicies into a serializable UserPolicies
+    /// Convert non-authoritative Core policy candidates into the wire response
     fn try_from(user_policies: treetop_core::PolicyCandidates) -> Result<Self, Self::Error> {
         let policies = user_policies
             .policies()
@@ -710,20 +707,13 @@ mod tests {
     use std::str::FromStr;
 
     #[test]
-    fn test_request_limits_deserialize_legacy_shape() {
-        let limits: RequestLimits = serde_json::from_str(
-            r#"{
-                "max_context_bytes": 8192,
-                "max_context_depth": 4,
-                "max_context_keys": 32
-            }"#,
-        )
-        .unwrap();
-
-        assert_eq!(limits.max_batch_size, None);
-        assert_eq!(limits.max_context_bytes, 8192);
-        assert_eq!(limits.max_context_depth, 4);
-        assert_eq!(limits.max_context_keys, 32);
+    fn request_limits_require_current_batch_bound() {
+        let legacy = r#"{"max_context_bytes":8192,"max_context_depth":4,"max_context_keys":32}"#;
+        assert!(serde_json::from_str::<RequestLimits>(legacy).is_err());
+        let mut current: serde_json::Value = serde_json::from_str(legacy).unwrap();
+        current["max_batch_size"] = 1024.into();
+        let limits: RequestLimits = serde_json::from_value(current).unwrap();
+        assert_eq!(limits.max_batch_size, 1024);
     }
 
     #[test]
@@ -805,8 +795,7 @@ mod tests {
         ];
 
         // Create a minimal PolicyVersion by deserializing from JSON (the only way to construct it)
-        let version_json =
-            r#"{"hash": "test-hash", "serial": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
+        let version_json = r#"{"hash": "test-hash", "label_set": null, "generation": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
         let version: PolicyVersion = serde_json::from_str(version_json).unwrap();
 
         let response = AuthorizeResponse::new(results, version, 1, 1);
@@ -836,7 +825,7 @@ mod tests {
                 },
             ),
         ];
-        let version_json = r#"{"hash": "v1", "serial": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
+        let version_json = r#"{"hash": "v1", "label_set": null, "generation": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
         let version: PolicyVersion = serde_json::from_str(version_json).unwrap();
         let response = AuthorizeResponse::new(results, version, 2, 0);
 
@@ -856,7 +845,7 @@ mod tests {
                 data: "success1".to_string(),
             },
         )];
-        let version_json = r#"{"hash": "v1", "serial": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
+        let version_json = r#"{"hash": "v1", "label_set": null, "generation": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
         let version: PolicyVersion = serde_json::from_str(version_json).unwrap();
         let response = AuthorizeResponse::new(results, version, 1, 0);
 
@@ -890,7 +879,7 @@ mod tests {
                 },
             ),
         ];
-        let version_json = r#"{"hash": "v1", "serial": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
+        let version_json = r#"{"hash": "v1", "label_set": null, "generation": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
         let version: PolicyVersion = serde_json::from_str(version_json).unwrap();
         let response = AuthorizeResponse::new(results, version, 3, 0);
 
@@ -923,7 +912,7 @@ mod tests {
                 },
             ),
         ];
-        let version_json = r#"{"hash": "v1", "serial": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
+        let version_json = r#"{"hash": "v1", "label_set": null, "generation": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
         let version: PolicyVersion = serde_json::from_str(version_json).unwrap();
         let response = AuthorizeResponse::new(results, version, 2, 0);
 
@@ -936,7 +925,7 @@ mod tests {
     fn test_find_by_id_empty_response() {
         // Test find_by_id on an empty response
         let results: Vec<IndexedResult<String>> = vec![];
-        let version_json = r#"{"hash": "v1", "serial": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
+        let version_json = r#"{"hash": "v1", "label_set": null, "generation": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
         let version: PolicyVersion = serde_json::from_str(version_json).unwrap();
         let response = AuthorizeResponse::new(results, version, 0, 0);
 
@@ -963,7 +952,7 @@ mod tests {
                 },
             ),
         ];
-        let version_json = r#"{"hash": "v1", "serial": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
+        let version_json = r#"{"hash": "v1", "label_set": null, "generation": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
         let version: PolicyVersion = serde_json::from_str(version_json).unwrap();
         let response = AuthorizeResponse::new(results, version, 2, 0);
 
@@ -993,7 +982,7 @@ mod tests {
                 },
             ),
         ];
-        let version_json = r#"{"hash": "v1", "serial": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
+        let version_json = r#"{"hash": "v1", "label_set": null, "generation": 1, "loaded_at": "2024-01-01T00:00:00Z"}"#;
         let version: PolicyVersion = serde_json::from_str(version_json).unwrap();
         let response = AuthorizeResponse::new(results, version, 2, 0);
 

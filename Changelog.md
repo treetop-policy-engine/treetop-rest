@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-09-06
+
+### Breaking changes
+
+- Report package versions in `/api/v1/version` independently of Git descriptions.
+  Source-built candidates return the same version contract as release builds.
+
+- Adopt published Core and Bundle 0.1.0 packages, with registry checksums in both
+  application and fuzz lockfiles and locked release builds. Label rules declare `target.resource_type` and
+  `target.attribute`; old `kind`/`output` syntax is rejected. Exact resource-type
+  and attribute tuples have one owner, and equal names on different types are
+  independent. Both direct application and registry sanitization enforce scope.
+- Accept only bundle/module format version 2. Migrate source manifests and label
+  rules, rebuild archives, and re-sign them. Failed replacements retain the
+  active authorization state and its version.
+- Remove `/api/v1/health` and `/api-docs/openapi.json`. Use `/livez`, `/readyz`,
+  and `/openapi.json`. Remove legacy defaults for status request limits, context
+  capabilities, and omitted policy-version metadata. `max_batch_size` is required.
+- Review type constraints in policies before trusting derived attributes; labels
+  registered on another type do not sanitize application-owned inputs here.
+  See [MIGRATION.md](MIGRATION.md) for the coordinated upgrade and release order.
+
 ## [0.0.16] - 2026-09-06
 
 ### Changed

@@ -452,12 +452,12 @@ async fn test_metrics_prometheus_format() {
 }
 
 #[actix_web::test]
-async fn test_http_metrics_after_health_request() {
+async fn test_http_metrics_after_version_request() {
     let store = create_test_store();
     let app = test::init_service(create_test_app_with_metrics(store)).await;
 
-    // Hit health endpoint to generate HTTP metrics
-    let req = test::TestRequest::get().uri("/api/v1/health").to_request();
+    // Hit version endpoint to generate HTTP metrics
+    let req = test::TestRequest::get().uri("/api/v1/version").to_request();
     let resp = test::call_service(&app, req).await;
     assert!(resp.status().is_success());
 
@@ -612,7 +612,7 @@ async fn test_http_metrics_include_client_ip_label() {
 
     // Send a request with a specific client IP
     let req = test::TestRequest::get()
-        .uri("/api/v1/health")
+        .uri("/api/v1/version")
         .peer_addr("127.0.0.1:1234".parse().unwrap())
         .insert_header(("x-forwarded-for", "203.0.113.10"))
         .to_request();

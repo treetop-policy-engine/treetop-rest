@@ -297,7 +297,7 @@ permit(principal, action == ExampleCo::DNS::Action::"read", resource);
         write(
             root.join("treetop-module.toml"),
             r#"
-format_version = 1
+format_version = 2
 name = "dns"
 namespace = "ExampleCo::DNS"
 policies = ["policy.cedar"]
@@ -307,7 +307,7 @@ policies = ["policy.cedar"]
         write(
             &manifest,
             r#"
-format_version = 1
+format_version = 2
 name = "fetch-test"
 
 [[modules]]

@@ -38,7 +38,6 @@ use treetop_bundle::{ArchiveLimits, BundleArchive, PreparedEngine, PreparedEvalu
 
 /// Canonical HTTP path for the generated OpenAPI document.
 pub const OPENAPI_JSON_PATH: &str = "/openapi.json";
-const LEGACY_OPENAPI_JSON_PATH: &str = "/api-docs/openapi.json";
 const UPLOAD_TOKEN_SECURITY_SCHEME: &str = "upload_token";
 const ACCESS_TOKEN_SECURITY_SCHEME: &str = "access_token";
 
@@ -144,9 +143,7 @@ pub fn init(cfg: &mut web::ServiceConfig) {
     cfg.route("/livez", web::get().to(livez))
         .route("/readyz", web::get().to(readyz))
         .route(OPENAPI_JSON_PATH, web::get().to(openapi_json))
-        .route(LEGACY_OPENAPI_JSON_PATH, web::get().to(openapi_json))
         .route("/api/v1/status", web::get().to(get_status))
-        .route("/api/v1/health", web::get().to(health))
         .route("/api/v1/version", web::get().to(version))
         // New unified endpoint
         .route("/api/v1/authorize", web::post().to(authorize))
@@ -175,7 +172,6 @@ pub fn init(cfg: &mut web::ServiceConfig) {
         get_status,
         livez,
         readyz,
-        health,
         version,
         metrics,
         openapi_json,
@@ -313,9 +309,6 @@ pub async fn openapi_json() -> HttpResponse {
     HttpResponse::Ok().json(openapi_document())
 }
 
-#[derive(Serialize, ToSchema)]
-pub struct HealthOK {}
-
 fn probe_response(ready: bool) -> HttpResponse {
     let mut response = if ready {
         HttpResponse::Ok()
@@ -357,18 +350,6 @@ pub async fn readyz(store: web::Data<SharedPolicyStore>) -> HttpResponse {
         .unwrap_or(false);
 
     probe_response(ready)
-}
-
-#[utoipa::path(
-        get,
-        tag = "Treetop REST API",
-        path = "/api/v1/health",
-        responses(
-            (status = 200, description = "Process is live (legacy endpoint)", body = HealthOK),
-        ),
-    )]
-pub async fn health() -> Result<web::Json<HealthOK>, ServiceError> {
-    Ok(web::Json(HealthOK {}))
 }
 
 #[derive(Serialize, ToSchema, Deserialize)]
@@ -414,9 +395,9 @@ pub async fn version(
         })
     };
     Ok(web::Json(VersionInfo {
-        version: build_info.version.clone(),
+        version: build_info.crate_version.to_owned(),
         core: Core {
-            version: build_info.core.clone(),
+            version: treetop_core::build_info().crate_version.to_owned(),
             cedar: build_info.cedar.to_string(),
         },
         policies: store.engine.current_version(),
@@ -1103,7 +1084,7 @@ pub async fn get_status(
     let store = store.read()?;
     let runtime_cfg = runtime_cfg.map(|cfg| *cfg.get_ref()).unwrap_or_default();
     let request_limits = RequestLimits {
-        max_batch_size: Some(runtime_cfg.max_batch_size),
+        max_batch_size: runtime_cfg.max_batch_size,
         max_context_bytes: runtime_cfg.max_context_bytes,
         max_context_depth: runtime_cfg.max_context_depth,
         max_context_keys: runtime_cfg.max_context_keys,

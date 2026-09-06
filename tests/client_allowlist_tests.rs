@@ -156,7 +156,6 @@ async fn public_routes_bypass_both_controls() {
             .route("/livez", web::get().to(ok_handler))
             .route("/readyz", web::get().to(ok_handler))
             .route("/openapi.json", web::get().to(ok_handler))
-            .route("/api-docs/openapi.json", web::get().to(ok_handler))
             .route("/swagger-ui/{tail:.*}", web::get().to(ok_handler)),
     )
     .await;
@@ -165,7 +164,6 @@ async fn public_routes_bypass_both_controls() {
         "/livez",
         "/readyz",
         "/openapi.json",
-        "/api-docs/openapi.json",
         "/swagger-ui/index.html",
     ] {
         let request = test::TestRequest::get()

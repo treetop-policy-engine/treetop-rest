@@ -3868,9 +3868,9 @@ dependencies = [
 
 [[package]]
 name = "treetop-bundle"
-version = "0.0.7"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4de3307406dc2e4b74e6f50b4fe518378da013a60fe5770760fde40c3ccb725"
+checksum = "baf018a94c40dcb26ea38c8d668e46c954ff966e05d93aae6d9b2a82a8b14d47"
 dependencies = [
  "base64 0.23.1",
  "cedar-policy",
@@ -3889,9 +3889,9 @@ dependencies = [
 
 [[package]]
 name = "treetop-core"
-version = "0.0.25"
+version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6960c898a461b9cf18b4b8aeb230a37d7367750b218081638d3fecf00aac59a8"
+checksum = "bcfeb65901158e4796e530ee2466e4b7fe55dcf8a1069f7d57edf0d08c691210"
 dependencies = [
  "arc-swap",
  "cedar-policy",
@@ -3907,7 +3907,7 @@ dependencies = [
 
 [[package]]
 name = "treetop-rest"
-version = "0.0.16"
+version = "0.1.0"
 dependencies = [
  "actix-service",
  "actix-web",

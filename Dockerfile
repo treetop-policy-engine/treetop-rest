@@ -25,7 +25,7 @@ COPY build.rs ./
 COPY benches ./benches
 COPY testdata ./testdata
 
-RUN cargo build --release --bin treetop-server
+RUN cargo build --locked --release --bin treetop-server
 
 # Runtime stage
 FROM alpine:3.24

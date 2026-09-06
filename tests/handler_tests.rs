@@ -116,17 +116,6 @@ fn assert_single_decision(body: &AuthorizeBriefResponse, expected: DecisionBrief
 }
 
 #[actix_web::test]
-async fn test_health_endpoint() {
-    let app =
-        test::init_service(App::new().route("/api/v1/health", web::get().to(handlers::health)))
-            .await;
-
-    let req = test::TestRequest::get().uri("/api/v1/health").to_request();
-    let resp = test::call_service(&app, req).await;
-    assert!(resp.status().is_success());
-}
-
-#[actix_web::test]
 async fn test_livez_endpoint_is_dependency_free() {
     let store = Arc::new(RwLock::new(PolicyStore::new().unwrap()));
     let app = test::init_service(
@@ -248,24 +237,13 @@ async fn test_openapi_json_endpoint() {
 }
 
 #[actix_web::test]
-async fn test_legacy_openapi_endpoint_matches_canonical_document() {
+async fn removed_legacy_routes_return_not_found() {
     let app = test::init_service(App::new().configure(handlers::init)).await;
-
-    let canonical_req = test::TestRequest::get()
-        .uri(handlers::OPENAPI_JSON_PATH)
-        .to_request();
-    let canonical_resp = test::call_service(&app, canonical_req).await;
-    assert_eq!(canonical_resp.status(), StatusCode::OK);
-    let canonical_body = test::read_body(canonical_resp).await;
-
-    let legacy_req = test::TestRequest::get()
-        .uri("/api-docs/openapi.json")
-        .to_request();
-    let legacy_resp = test::call_service(&app, legacy_req).await;
-    assert_eq!(legacy_resp.status(), StatusCode::OK);
-    let legacy_body = test::read_body(legacy_resp).await;
-
-    assert_eq!(legacy_body, canonical_body);
+    for path in ["/api-docs/openapi.json", "/api/v1/health"] {
+        let request = test::TestRequest::get().uri(path).to_request();
+        let response = test::call_service(&app, request).await;
+        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+    }
 }
 
 #[actix_web::test]
@@ -285,7 +263,7 @@ async fn test_get_status_endpoint() {
 
     assert!(resp.status().is_success());
     let body: StatusResponse = test::read_body_json(resp).await;
-    assert_eq!(body.request_limits.max_batch_size, Some(1024));
+    assert_eq!(body.request_limits.max_batch_size, 1024);
     assert_eq!(body.policy_configuration.policies.entries, 3);
     assert!(body.request_context.supported);
     assert!(!body.request_context.schema_backed);
@@ -1467,4 +1445,17 @@ async fn malformed_identity_and_ip_reject_the_entire_batch() {
         assert_eq!(response.status(), StatusCode::BAD_REQUEST, "{pointer}");
         assert_eq!(store.read().unwrap().engine.current_version(), version);
     }
+}
+
+#[actix_web::test]
+async fn version_reports_package_versions_without_git_describe() {
+    let response = handlers::version(web::Data::new(create_test_store()))
+        .await
+        .unwrap();
+    assert_eq!(response.version, env!("CARGO_PKG_VERSION"));
+    assert_eq!(
+        response.core.version,
+        treetop_core::build_info().crate_version
+    );
+    assert!(response.schema.is_none());
 }

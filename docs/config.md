@@ -91,7 +91,7 @@ value is set.
 ## Admission controls
 
 Admission applies to `/api/v1/**` and `/metrics`. It does not apply to `/livez`, `/readyz`, `/openapi.json`,
-`/api-docs/openapi.json`, or `/swagger-ui/**`.
+or `/swagger-ui/**`.
 
 | `TREETOP_CLIENT_ALLOWLIST` | `TREETOP_ACCESS_TOKENS` | Result |
 | --- | --- | --- |
