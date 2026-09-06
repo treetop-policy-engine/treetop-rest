@@ -161,9 +161,9 @@ fn test_labels_json_structure() {
 
     // Check first label has required fields
     let first_label = &array[0];
-    assert!(first_label.get("kind").is_some());
+    assert!(first_label["target"].get("resource_type").is_some());
     assert!(first_label.get("field").is_some());
-    assert!(first_label.get("output").is_some());
+    assert!(first_label["target"].get("attribute").is_some());
     assert!(first_label.get("patterns").is_some());
 
     // Check patterns structure

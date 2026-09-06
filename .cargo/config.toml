@@ -1,0 +1,5 @@
+# Coordinated, unmerged 0.1.0 candidate. Replace with registry sources after
+# approval and dependency publication; the exact revision is integration-tested.
+[patch.crates-io]
+treetop-core = { git = "https://github.com/treetop-policy-engine/treetop-core", rev = "fc569c4b8ed7a502fb27b831341212a419407765" }
+treetop-bundle = { git = "https://github.com/treetop-policy-engine/treetop-bundle", rev = "9a0463383c4837d2076f2d63862abae0832083fd" }

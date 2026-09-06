@@ -66,9 +66,7 @@ namespace ExampleCo::DNS {
         root.join("labels.json"),
         r#"[
   {
-    "kind": "ExampleCo::DNS::Host",
-    "field": "name",
-    "output": "labels",
+    "target": {"resource_type": "ExampleCo::DNS::Host", "attribute": "labels"}, "field": "name",
     "patterns": [{"name": "production", "regex": "^prod-"}]
   }
 ]"#,
@@ -76,7 +74,7 @@ namespace ExampleCo::DNS {
     write(
         root.join("treetop-module.toml"),
         r#"
-format_version = 1
+format_version = 2
 name = "dns"
 namespace = "ExampleCo::DNS"
 policies = ["policy.cedar"]
@@ -88,7 +86,7 @@ labels = ["labels.json"]
     write(
         &manifest,
         r#"
-format_version = 1
+format_version = 2
 name = "benchmark"
 
 [[modules]]

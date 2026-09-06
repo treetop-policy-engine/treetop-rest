@@ -37,16 +37,28 @@ jobs:
         with:
           path: target
           key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+      - name: Check formatting
+        run: cargo fmt --all --check
       - name: Build
-        run: cargo build --verbose
+        run: cargo build --locked --all-features --verbose
       - name: Verify OpenAPI docs
         run: |
-          cargo run --example openapi > docs/openapi.json
+          cargo run --locked --example openapi > docs/openapi.json
           git diff --exit-code docs/openapi.json
       - name: Run tests
-        run: cargo test --verbose
+        run: cargo test --locked --all-features --verbose
       - name: Run clippy
-        run: cargo clippy --verbose
+        run: cargo clippy --locked --all-targets --all-features -- -D warnings
+      - name: Check documentation
+        run: RUSTDOCFLAGS="-D warnings" cargo doc --locked --all-features --no-deps
+      - name: Lint Markdown
+        run: npx --yes markdownlint-cli2@0.23.2 --config .markdownlint.json "**/*.md" "!target" "!fuzz/target"
+      - name: Install cargo-audit
+        uses: taiki-e/install-action@7f4eb899022d8fe70b20c4f3de697aa85c309026 # v2
+        with:
+          tool: cargo-audit@0.22.2
+      - name: Audit locked dependencies
+        run: cargo audit --deny warnings
 
   publish-develop:
     name: Publish “develop” image

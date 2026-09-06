@@ -3868,9 +3868,8 @@ dependencies = [
 
 [[package]]
 name = "treetop-bundle"
-version = "0.0.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a4de3307406dc2e4b74e6f50b4fe518378da013a60fe5770760fde40c3ccb725"
+version = "0.1.0"
+source = "git+https://github.com/treetop-policy-engine/treetop-bundle?rev=9a0463383c4837d2076f2d63862abae0832083fd#9a0463383c4837d2076f2d63862abae0832083fd"
 dependencies = [
  "base64 0.23.1",
  "cedar-policy",
@@ -3889,9 +3888,8 @@ dependencies = [
 
 [[package]]
 name = "treetop-core"
-version = "0.0.25"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6960c898a461b9cf18b4b8aeb230a37d7367750b218081638d3fecf00aac59a8"
+version = "0.1.0"
+source = "git+https://github.com/treetop-policy-engine/treetop-core?rev=fc569c4b8ed7a502fb27b831341212a419407765#fc569c4b8ed7a502fb27b831341212a419407765"
 dependencies = [
  "arc-swap",
  "cedar-policy",
@@ -3907,7 +3905,7 @@ dependencies = [
 
 [[package]]
 name = "treetop-rest"
-version = "0.0.16"
+version = "0.1.0"
 dependencies = [
  "actix-service",
  "actix-web",

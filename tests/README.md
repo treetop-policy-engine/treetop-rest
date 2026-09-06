@@ -48,7 +48,7 @@ Integration tests are in separate files in the `tests/` directory.
 
 Tests for HTTP API endpoints using Actix-web test utilities:
 
-- **Health endpoint** - Service health check
+- **Operational probes** - Liveness and readiness
 - **OpenAPI endpoints** - Canonical and compatibility documents
 - **Status endpoint** - Service status and metadata
 - **Check endpoint** - Authorization evaluation
@@ -122,7 +122,7 @@ Tests for Prometheus metrics collection and reporting:
 #### Latency Characterization (`tests/latency_characterization.rs`)
 
 An ignored, threshold-free end-to-end characterization starts an in-process Actix server on an ephemeral loopback port.
-It reports full client HTTP timing and the corresponding Treetop Core phase means for health, policy retrieval, simple,
+It reports full client HTTP timing and the corresponding Treetop Core phase means for liveness, policy retrieval, simple,
 labeled, and batch authorization workloads. It also supports an explicitly requested machine-anonymous JSON export.
 
 Run it in release mode:

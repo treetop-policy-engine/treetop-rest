@@ -23,7 +23,7 @@ See the [security guide](security.md) for deployment trust boundaries and produc
   and `WWW-Authenticate: Bearer` response header.
 - A configured client allowlist applies independently to the same routes. A disallowed or unresolved client address
   receives `403 Forbidden`. When both controls are configured, the ACL is evaluated first and both controls must pass.
-- `/livez`, `/readyz`, `/openapi.json`, `/api-docs/openapi.json`, and `/swagger-ui/**` are public.
+- `/livez`, `/readyz`, `/openapi.json`, and `/swagger-ui/**` are public.
 - Uploads to `/api/v1/policies`, `/api/v1/schema`, and `/api/v1/bundle` additionally require
   `TREETOP_ALLOW_UPLOAD=true` and the
   `X-Upload-Token: <token>` header matching the server-generated upload token. When Bearer admission is enabled, uploads
@@ -64,8 +64,6 @@ numbers when the underlying parser reports them.
 - Response: OpenAPI JSON document for the Treetop REST API.
 - Interactive documentation: Swagger UI is available at `/swagger-ui/` and loads
   this canonical document.
-- Compatibility: `/api-docs/openapi.json` serves the same document for clients of
-  earlier releases.
 - Static copy: [`docs/openapi.json`](openapi.json). Regenerate it with
   `cargo run --example openapi > docs/openapi.json`.
 
@@ -298,19 +296,14 @@ histogram_quantile(
 - Native and classic histogram samples are different Prometheus data types. During dual ingestion, keep their queries
   separate; do not add them together.
 
-### GET /api/v1/health
-
-- Purpose: legacy liveness probe retained for compatibility. New deployments should
-  use `/livez` and `/readyz`.
-- Response: `{}` with HTTP 200.
-
 ### Authorization state metadata
 
 Policy versions include `hash`, `loaded_at`, nullable `label_set`, and unsigned `generation`.
 Each authorization batch and every successful item use the same complete state version. `label_set`
 identifies the installed label configuration using the SHA-256 digest of its document; bundle documents
 use canonical JSON. `generation` is local to an engine instance and can restart when REST replaces it.
-Consumers comparing versions must include all four fields.
+Consumers comparing versions must include all four fields. All four fields are required;
+`label_set` may be explicitly null. Legacy omitted metadata is rejected by current SDKs.
 
 Malformed principal/action/resource identities and IP attributes cause HTTP 400 during deserialization,
 rejecting the entire batch before evaluation. Evaluation-time failures still use failed per-item results.
@@ -398,7 +391,7 @@ Example response:
       "content": "{...schema json...}"
     },
     "bundle": {
-      "format_version": 1,
+      "format_version": 2,
       "bundle_id": "9dca3dfe1c7e976b9a5c713a7f82529c78d92691a4e419142fdde92f50f033f4",
       "archive_sha256": "d88ccdddbca3e4d305f705348e80b0de3c326c9384b9a7c25942f0254f54342a",
       "compressed_size": 16384,

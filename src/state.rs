@@ -182,7 +182,8 @@ impl<T: MetadataParser> Metadata<T> {
 
 /// Parse labels from JSON and return them as a vector of labelers.
 ///
-/// The format of the JSON is expected to be an array of objects, each with a "kind", "field", "output" and "patterns" field.
+/// Each rule declares `target: {resource_type, attribute}`, `field`, and `patterns`.
+/// Bundle validates the exact target and rejects legacy rule-level kind/output keys.
 pub fn parse_labels(content: &str) -> Result<Vec<Arc<dyn Labeler>>, ServiceError> {
     Ok(LabelSet::from_json_str(content)?.to_labelers())
 }
@@ -202,16 +203,10 @@ impl MetadataParser for OfPolicies {
     }
 }
 
-/// Count the number of host labels in the content.
+/// Count validated, declared label targets in a Bundle-format JSON rule array.
 ///
-/// The format of the JSON is expected to be an array of objects, each with a "name" and "regex" field.
-/// Example:
-/// ```json
-/// [
-///     { "name": "example.com", "regex": "^example\\.com$" },
-///     { "name": "test.com", "regex": "^test\\.com$" }
-/// ]
-/// ```
+/// Rules use the same strict parser as installation, including target ownership,
+/// scope, pattern limits, and regular expression validation.
 impl MetadataParser for OfLabels {
     fn count_entries(content: &str) -> Result<usize, ServiceError> {
         Ok(LabelSet::from_json_str(content)?.rules().len())
@@ -937,7 +932,7 @@ mod tests {
             labelers: Vec::new(),
             request_context_status: RequestContextStatus::no_schema(),
             bundle: BundleMetadata {
-                format_version: 1,
+                format_version: 2,
                 bundle_id: "bundle-id".to_string(),
                 archive_sha256: "archive-sha256".to_string(),
                 compressed_size: 1,
@@ -1016,9 +1011,7 @@ permit (
 
     const LABELS_JSON: &str = r#"[
   {
-    "kind": "Photo",
-    "field": "name",
-    "output": "nameLabels",
+    "target": {"resource_type": "Photo", "attribute": "nameLabels"}, "field": "name",
     "patterns": [
       {
         "name": "vacation",
@@ -1027,6 +1020,61 @@ permit (
     ]
   }
 ]"#;
+
+    #[test]
+    fn declared_scopes_authorize_independently_and_reject_legacy_reload() {
+        use treetop_core::{Action, AttrValue, Principal, Request, Resource, User};
+        let mut store = PolicyStore::new().unwrap();
+        store
+            .set_dsl(
+                r#"permit(principal, action, resource is App::Host)
+            when {resource.labels.contains("prod")};
+            permit(principal, action, resource is Other::Host)
+            when {resource.labels.contains("dev")};"#,
+                None,
+                None,
+            )
+            .unwrap();
+        let labels = r#"[
+            {"target":{"resource_type":"App::Host","attribute":"labels"},"field":"name","patterns":[{"name":"prod","regex":"^prod"}]},
+            {"target":{"resource_type":"Other::Host","attribute":"labels"},"field":"name","patterns":[{"name":"dev","regex":"^dev"}]}
+        ]"#;
+        store.set_labels(labels, None, None).unwrap();
+        let version = store.engine.current_version();
+        let metadata = store.labels.sha256.clone();
+        for (kind, name, allowed) in [
+            ("App::Host", "prod-one", true),
+            ("Other::Host", "dev-one", true),
+            ("App::Host", "dev-one", false),
+            ("Other::Host", "prod-one", false),
+        ] {
+            let request = Request {
+                principal: Principal::User(User::new("alice", None, None).unwrap()),
+                action: Action::new("read", None).unwrap(),
+                resource: Resource::new(kind, "one")
+                    .unwrap()
+                    .with_attr("name", AttrValue::String(name.into()))
+                    .with_attr(
+                        "labels",
+                        AttrValue::Set(vec![
+                            AttrValue::String("prod".into()),
+                            AttrValue::String("dev".into()),
+                        ]),
+                    ),
+            };
+            let decision = store.engine.evaluate(&request).unwrap();
+            assert_eq!(decision.is_allowed(), allowed);
+            assert_eq!(decision.version(), &version);
+        }
+        for invalid in [
+            r#"[{"kind":"App::Host","output":"labels","field":"name","patterns":[{"name":"prod","regex":"prod"}]}]"#.to_string(),
+            labels.replace("Other::Host", "App::Host"),
+        ] {
+            assert!(store.set_labels(&invalid, None, None).is_err());
+            assert_eq!(store.engine.current_version(), version);
+            assert_eq!(store.labels.sha256, metadata);
+        }
+    }
 
     #[test]
     fn label_versions_survive_policy_replacement_and_failed_label_reload() {
@@ -1113,9 +1161,7 @@ forbid (
     fn test_metadata_labels_valid() {
         let labels_json = r#"[
     {
-        "kind": "Host",
-        "field": "name",
-        "output": "nameLabels",
+        "target": {"resource_type": "Host", "attribute": "nameLabels"}, "field": "name",
         "patterns": [
             {
                 "name": "example_domain",
@@ -1140,9 +1186,7 @@ forbid (
     fn test_metadata_labels_empty_pattern() {
         let labels_json = r#"[
     {
-        "kind": "Host",
-        "field": "name",
-        "output": "nameLabels",
+        "target": {"resource_type": "Host", "attribute": "nameLabels"}, "field": "name",
         "patterns": [
             {
                 "name": "",
@@ -1159,9 +1203,7 @@ forbid (
     fn test_metadata_labels_invalid_regex() {
         let labels_json = r#"[
     {
-        "kind": "Host",
-        "field": "name",
-        "output": "nameLabels",
+        "target": {"resource_type": "Host", "attribute": "nameLabels"}, "field": "name",
         "patterns": [
             {
                 "name": "bad_pattern",
@@ -1289,9 +1331,7 @@ permit (
         let mut store = PolicyStore::new().unwrap();
         let labels_json = r#"[
     {
-        "kind": "Host",
-        "field": "name",
-        "output": "nameLabels",
+        "target": {"resource_type": "Host", "attribute": "nameLabels"}, "field": "name",
         "patterns": [
             {
                 "name": "example",

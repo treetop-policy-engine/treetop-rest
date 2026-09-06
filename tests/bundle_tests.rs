@@ -35,7 +35,7 @@ permit (
         write(
             root.join("treetop-module.toml"),
             r#"
-format_version = 1
+format_version = 2
 name = "dns"
 namespace = "ExampleCo::DNS"
 policies = ["policy.cedar"]
@@ -45,7 +45,7 @@ policies = ["policy.cedar"]
         write(
             &manifest,
             r#"
-format_version = 1
+format_version = 2
 name = "test"
 
 [[modules]]
@@ -77,9 +77,9 @@ role = "ordinary"
 }
 
 #[actix_web::test]
-async fn legacy_labels_use_shared_strict_validation() {
+async fn declared_labels_use_shared_strict_validation() {
     let error = parse_labels(
-        r#"[{"kind":"App::Host","field":"name","output":"labels","patterns":[{"name":"prod","regex":"prod"}],"unexpected":true}]"#,
+        r#"[{"target": {"resource_type": "App::Host", "attribute": "labels"}, "field": "name","patterns":[{"name":"prod","regex":"prod"}],"unexpected":true}]"#,
     )
     .err()
     .unwrap();
@@ -108,7 +108,7 @@ async fn bundle_upload_applies_complete_state_and_metadata() {
 
     assert_eq!(response.status(), StatusCode::OK);
     let body: serde_json::Value = test::read_body_json(response).await;
-    assert_eq!(body["bundle"]["format_version"], 1);
+    assert_eq!(body["bundle"]["format_version"], 2);
     assert_eq!(body["bundle"]["module_count"], 1);
     assert_eq!(body["bundle"]["signed"], false);
     let store = store.read().unwrap();
@@ -482,7 +482,7 @@ permit (
     write(
         root.join("dns-module.toml"),
         r#"
-format_version = 1
+format_version = 2
 name = "dns"
 namespace = "ExampleCo::DNS"
 policies = ["dns.cedar"]
@@ -502,7 +502,7 @@ permit (
     write(
         root.join("www-module.toml"),
         r#"
-format_version = 1
+format_version = 2
 name = "www"
 namespace = "ExampleCo::WWW"
 policies = ["www.cedar"]
@@ -522,7 +522,7 @@ forbid (
     write(
         root.join("global-module.toml"),
         r#"
-format_version = 1
+format_version = 2
 name = "platform"
 namespace = "ExampleCo::Platform"
 policies = ["global.cedar"]
@@ -532,7 +532,7 @@ policies = ["global.cedar"]
     write(
         &manifest,
         r#"
-format_version = 1
+format_version = 2
 name = "scoped"
 
 [[modules]]

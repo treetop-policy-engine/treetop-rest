@@ -1,6 +1,6 @@
 [package]
 name = "treetop-rest"
-version = "0.0.16"
+version = "0.1.0"
 edition = "2024"
 description = "REST server for the Treetop policy management framework"
 license = "MIT"
@@ -45,8 +45,8 @@ tracing-subscriber = { version = "0.3.23", features = [
     "serde",
     "serde_json",
 ] }
-treetop-core = { version = "0.0.25", features = ["observability"] }
-treetop-bundle = { version = "=0.0.7", default-features = false }
+treetop-core = { version = "=0.1.0", features = ["observability"] }
+treetop-bundle = { version = "=0.1.0", default-features = false }
 prometheus-client = { version = "0.25.0", features = ["prometheus_protobuf", "protobuf-protox"] }
 url = { version = "2.5.8", features = ["serde"] }
 utoipa = { version = "5.5.0", features = ["actix_extras", "chrono", "yaml"] }
@@ -62,7 +62,7 @@ ed25519-dalek = { version = "3.0.0", features = ["pem", "pkcs8"] }
 rstest = "0.26.1"
 tempfile = "3.27.0"
 gungraun = "0.19.4"
-treetop-core = { version = "0.0.25", features = ["bench-internal"] }
+treetop-core = { version = "=0.1.0", features = ["bench-internal"] }
 
 [build-dependencies]
 cargo_metadata = "0.23.1"

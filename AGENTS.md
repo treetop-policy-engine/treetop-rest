@@ -1,5 +1,13 @@
 # Repository Guidelines
 
+## Early-release contract
+
+Prefer correctness and strict, uniform project contracts over compatibility.
+Remove deprecated APIs and obsolete aliases when replacing a contract; document
+breaking changes and concrete migration steps. Label rules must use Bundle’s
+Core-validated declared targets. Coordinated PRs may pin exact unmerged dependency
+revisions for verification; publication and merging require user approval.
+
 ## Verification
 
 - Use targeted tests while iterating, then run the complete test suite before considering a change complete:

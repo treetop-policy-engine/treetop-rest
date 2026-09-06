@@ -7,7 +7,7 @@
       "name": "MIT",
       "identifier": "MIT"
     },
-    "version": "0.0.16"
+    "version": "0.1.0"
   },
   "paths": {
     "/api/v1/authorize": {
@@ -216,60 +216,6 @@
           {
             "upload_token": []
           }
-        ]
-      }
-    },
-    "/api/v1/health": {
-      "get": {
-        "tags": [
-          "Treetop REST API"
-        ],
-        "operationId": "health",
-        "responses": {
-          "200": {
-            "description": "Process is live (legacy endpoint)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HealthOK"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Missing, malformed, or invalid Bearer token",
-            "headers": {
-              "WWW-Authenticate": {
-                "schema": {
-                  "type": "string"
-                },
-                "description": "Bearer authentication challenge"
-              }
-            },
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Client IP is not allowed or cannot be resolved",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorResponse"
-                }
-              }
-            }
-          }
-        },
-        "security": [
-          {
-            "access_token": []
-          },
-          {}
         ]
       }
     },
@@ -1519,9 +1465,6 @@
         },
         "description": "A collection of Group entries."
       },
-      "HealthOK": {
-        "type": "object"
-      },
       "IndexedResult_AuthorizeDecisionBrief": {
         "allOf": [
           {
@@ -1875,7 +1818,9 @@
         "description": "Version metadata for the complete engine state used during an evaluation.",
         "required": [
           "hash",
-          "loaded_at"
+          "loaded_at",
+          "label_set",
+          "generation"
         ],
         "properties": {
           "generation": {
@@ -2006,16 +1951,14 @@
       "RequestLimits": {
         "type": "object",
         "required": [
+          "max_batch_size",
           "max_context_bytes",
           "max_context_depth",
           "max_context_keys"
         ],
         "properties": {
           "max_batch_size": {
-            "type": [
-              "integer",
-              "null"
-            ],
+            "type": "integer",
             "minimum": 0
           },
           "max_context_bytes": {
@@ -2112,7 +2055,9 @@
         "type": "object",
         "required": [
           "policy_configuration",
-          "parallel_configuration"
+          "parallel_configuration",
+          "request_limits",
+          "request_context"
         ],
         "properties": {
           "parallel_configuration": {

@@ -13,9 +13,7 @@ permit (
 
 const LABELS_JSON: &str = r#"[
   {
-    "kind": "Host",
-    "field": "name",
-    "output": "nameLabels",
+    "target": {"resource_type": "Host", "attribute": "nameLabels"}, "field": "name",
     "patterns": [{"name": "production", "regex": "^prod-"}]
   }
 ]"#;
