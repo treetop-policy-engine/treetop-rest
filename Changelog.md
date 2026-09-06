@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Breaking changes
 
+- Report package versions in `/api/v1/version` independently of Git descriptions.
+  Source-built candidates return the same version contract as release builds.
+
 - Adopt Core and Bundle 0.1.0. Label rules declare `target.resource_type` and
   `target.attribute`; old `kind`/`output` syntax is rejected. Exact resource-type
   and attribute tuples have one owner, and equal names on different types are

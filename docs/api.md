@@ -715,3 +715,7 @@ curl -X POST http://localhost:9999/api/v1/authorize \
 or use the optional `id` field for easier tracking
 5. **Runtime visibility**: Inspect `/api/v1/status.request_context` to see whether evaluation is currently schema-backed
    or in permissive fallback mode
+
+The version endpoint reports REST and Core package versions without a `v` prefix
+or Git description suffix. Policy versions require all four state fields; the
+optional schema revision is a distinct object with only `hash` and `loaded_at`.

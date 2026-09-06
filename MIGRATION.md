@@ -44,3 +44,7 @@ Cargo configuration pins exact unmerged Core and Bundle revisions for integratio
 and reproducible CI. After approval, publish Core and Bundle in that order, switch
 candidate patches to registry releases, refresh lockfiles, and repeat verification
 before releasing REST and its consumers. Do not merge or release before approval.
+
+The version endpoint reports REST and Core package versions without a `v` prefix
+or Git description suffix. Policy versions require all four state fields; the
+optional schema revision is a distinct object with only `hash` and `loaded_at`.

@@ -395,9 +395,9 @@ pub async fn version(
         })
     };
     Ok(web::Json(VersionInfo {
-        version: build_info.version.clone(),
+        version: build_info.crate_version.to_owned(),
         core: Core {
-            version: build_info.core.clone(),
+            version: treetop_core::build_info().crate_version.to_owned(),
             cedar: build_info.cedar.to_string(),
         },
         policies: store.engine.current_version(),

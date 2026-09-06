@@ -1446,3 +1446,16 @@ async fn malformed_identity_and_ip_reject_the_entire_batch() {
         assert_eq!(store.read().unwrap().engine.current_version(), version);
     }
 }
+
+#[actix_web::test]
+async fn version_reports_package_versions_without_git_describe() {
+    let response = handlers::version(web::Data::new(create_test_store()))
+        .await
+        .unwrap();
+    assert_eq!(response.version, env!("CARGO_PKG_VERSION"));
+    assert_eq!(
+        response.core.version,
+        treetop_core::build_info().crate_version
+    );
+    assert!(response.schema.is_none());
+}
