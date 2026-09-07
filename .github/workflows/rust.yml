@@ -54,7 +54,7 @@ jobs:
       - name: Lint Markdown
         run: npx --yes markdownlint-cli2@0.23.2 --config .markdownlint.json "**/*.md" "!target" "!fuzz/target"
       - name: Install cargo-audit
-        uses: taiki-e/install-action@7f4eb899022d8fe70b20c4f3de697aa85c309026 # v2
+        uses: taiki-e/install-action@5bf6ce016fd2e72eefc647cbca1e4213f65955b8 # v2
         with:
           tool: cargo-audit@0.22.2
       - name: Audit locked dependencies
