@@ -40,10 +40,19 @@ intact. Existing sessions retain their complete original generation.
 
 ## Published dependencies
 
-REST requires Core 0.1.0 and Bundle 0.1.0 from crates.io. Both the application and
+The published REST 0.1.0 release requires Core 0.1.0 and Bundle 0.1.0 from crates.io.
+Both the application and
 fuzz lockfiles use registry sources without candidate Git patches. Release Core,
 then Bundle, then REST before upgrading SDKs and their consumers.
 
 The version endpoint reports REST and Core package versions without a `v` prefix
 or Git description suffix. Policy versions require all four state fields; the
 optional schema revision is a distinct object with only `hash` and `loaded_at`.
+
+## Core 0.2 and Cedar 4.13 dependency refresh
+
+Rebuild and re-sign policy archives using Bundle CLI 0.2.0 before deploying the
+updated server. Archives must match Bundle 0.2.0, Core 0.2.0, and Cedar 4.13.0
+generator metadata; do not edit signed archives. Manifest and signature format
+version 2 and declared label targets are unchanged. Consumers that inspect Cedar
+policy JSON must handle an array-valued `attr` for nested `has` expressions.
