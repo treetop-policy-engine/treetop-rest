@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Refresh application and fuzz dependencies, including Actix, Reqwest, UUID, and
+  rstest, and update pinned GitHub Actions to their latest stable releases.
+- Update the container builder and policy-scale toolchain to Rust 1.98.1.
+  Keep Cedar at 4.12.0, as required by Core and Bundle 0.1.0.
+
 ## [0.1.0] - 2026-09-06
 
 ### Breaking changes

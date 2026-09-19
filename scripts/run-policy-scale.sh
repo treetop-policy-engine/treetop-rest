@@ -4,7 +4,7 @@ set -euo pipefail
 
 mode=${TREETOP_REST_SCALE_MODE:-curve}
 output_dir=${TREETOP_REST_SCALE_OUTPUT_DIR:-performance-results/policy-scale}
-toolchain=${TREETOP_REST_SCALE_TOOLCHAIN:-1.97.1}
+toolchain=${TREETOP_REST_SCALE_TOOLCHAIN:-1.98.1}
 
 case "${mode}" in
     curve)

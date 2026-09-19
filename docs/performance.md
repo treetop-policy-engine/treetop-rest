@@ -312,7 +312,7 @@ all artifacts before sharing them.
 | `TREETOP_REST_SCALE_SOAK_SECONDS` | `900` in soak mode | Mixed-traffic soak duration. |
 | `TREETOP_REST_SCALE_RELOAD_INTERVAL_SECONDS` | `60` | Delay between completed soak reloads. |
 | `TREETOP_REST_SCALE_OUTPUT_DIR` | `performance-results/policy-scale` | Artifact root. |
-| `TREETOP_REST_SCALE_TOOLCHAIN` | `1.97.1` | Rust toolchain used for the release build and run. |
+| `TREETOP_REST_SCALE_TOOLCHAIN` | `1.98.1` | Rust toolchain used for the release build and run. |
 
 The weekly workflow and manual runs are observational and threshold-free. Compare the full curve and repeated runs,
 and investigate changes in latency, throughput, loading time, memory, series count, or metric shape rather than treating
