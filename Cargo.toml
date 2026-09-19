@@ -45,15 +45,15 @@ tracing-subscriber = { version = "0.3.23", features = [
     "serde",
     "serde_json",
 ] }
-treetop-core = { version = "=0.1.0", features = ["observability"] }
-treetop-bundle = { version = "=0.1.0", default-features = false }
+treetop-core = { version = "=0.2.0", features = ["observability"] }
+treetop-bundle = { version = "=0.2.0", git = "https://github.com/treetop-policy-engine/treetop-bundle", rev = "66ee524a62377a7da0261086a3353bb330c72b54", default-features = false }
 prometheus-client = { version = "0.25.1", features = ["prometheus_protobuf", "protobuf-protox"] }
 url = { version = "2.5.8", features = ["serde"] }
 utoipa = { version = "5.5.0", features = ["actix_extras", "chrono", "yaml"] }
 utoipa-swagger-ui = { version = "9.0.2", features = ["actix-web", "vendored"] }
 uuid = { version = "1.26.1", features = ["v4"] }
-# Core and Bundle 0.1.0 require exactly Cedar 4.12.0; upgrade these together.
-cedar-policy = "=4.12.0"
+# Keep Cedar aligned with the exact Core and Bundle release dependencies.
+cedar-policy = "=4.13.0"
 
 [dev-dependencies]
 actix-rt = "2.15.0"
@@ -63,7 +63,7 @@ ed25519-dalek = { version = "3.0.0", features = ["pem", "pkcs8"] }
 rstest = "0.27.0"
 tempfile = "3.27.0"
 gungraun = "0.19.4"
-treetop-core = { version = "=0.1.0", features = ["bench-internal"] }
+treetop-core = { version = "=0.2.0", features = ["bench-internal"] }
 
 [build-dependencies]
 cargo_metadata = "0.23.1"

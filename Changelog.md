@@ -7,12 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- Upgrade to Core 0.2.0, Bundle 0.2.0, and Cedar 4.13.0. Rebuild and re-sign
+  archives with Bundle CLI 0.2.0 before deploying this server. Old generator
+  versions remain rejected. Policy JSON consumers must support array-valued
+  `attr` in nested Cedar `has` expressions.
+
 ### Changed
 
+- Refresh both Rust lockfiles and pin GitHub Actions to current upstream commits.
 - Refresh application and fuzz dependencies, including Actix, Reqwest, UUID, and
   rstest, and update pinned GitHub Actions to their latest stable releases.
 - Update the container builder and policy-scale toolchain to Rust 1.98.1.
-  Keep Cedar at 4.12.0, as required by Core and Bundle 0.1.0.
 
 ## [0.1.0] - 2026-09-06
 
