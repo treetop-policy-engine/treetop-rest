@@ -44,7 +44,7 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  TREETOP_REST_SCALE_TOOLCHAIN: "1.97.1"
+  TREETOP_REST_SCALE_TOOLCHAIN: "1.98.1"
 
 jobs:
   characterize:
@@ -62,10 +62,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install Rust 1.97.1
+      - name: Install Rust 1.98.1
         uses: dtolnay/rust-toolchain@6c977a6ca4077a0ceb28ffbe03f59d46e9ac8772 # v1
         with:
-          toolchain: 1.97.1
+          toolchain: 1.98.1
 
       - name: Cache Cargo artifacts
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
