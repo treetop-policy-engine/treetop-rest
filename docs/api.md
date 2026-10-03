@@ -323,10 +323,10 @@ Example response:
 
 ```json
 {
-  "version": "0.1.0",
+  "version": "0.2.0",
   "core": {
     "version": "0.3.0",
-    "cedar": "0.11.0"
+    "cedar": "4.13.0"
   },
   "policies": {
     "hash": "c82d116854d77bf689c3d15e167764876dffe869c970bc08ab7c5dacd7726219",
