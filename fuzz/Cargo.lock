@@ -3809,7 +3809,8 @@ dependencies = [
 [[package]]
 name = "treetop-bundle"
 version = "0.3.0"
-source = "git+https://github.com/treetop-policy-engine/treetop-bundle?rev=46094893b2d20a36f90966304e9c5d99392e79da#46094893b2d20a36f90966304e9c5d99392e79da"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8e086c658e6b7ef686ac705b893de232d55b759f70c2e4147671c95c341d8905"
 dependencies = [
  "base64 0.23.1",
  "cedar-policy",

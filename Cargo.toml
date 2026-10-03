@@ -46,8 +46,7 @@ tracing-subscriber = { version = "0.3.23", features = [
     "serde_json",
 ] }
 treetop-core = { version = "=0.3.0", features = ["observability"] }
-# Pin the reviewed candidate until Bundle 0.3.0 is published to crates.io.
-treetop-bundle = { version = "=0.3.0", git = "https://github.com/treetop-policy-engine/treetop-bundle", rev = "46094893b2d20a36f90966304e9c5d99392e79da", default-features = false }
+treetop-bundle = { version = "=0.3.0", default-features = false }
 prometheus-client = { version = "0.25.1", features = ["prometheus_protobuf", "protobuf-protox"] }
 url = { version = "2.5.8", features = ["serde"] }
 utoipa = { version = "6.0.0", features = ["actix_extras", "chrono", "yaml"] }

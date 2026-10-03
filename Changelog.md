@@ -11,22 +11,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Upgrade to Core and Bundle 0.3.0. Rebuild and re-sign archives with Bundle CLI
   0.3.0 before deploying this server; older generator versions remain rejected.
-  Cedar 4.13.0 and bundle format version 2 are unchanged.
+  Cedar 4.13.0 and bundle format version 2 are unchanged. When upgrading from
+  Core 0.1, policy JSON consumers must also support array-valued `attr` in nested
+  Cedar `has` expressions.
 - Upgrade public OpenAPI schema traits to Utoipa 6 and Swagger UI integration to
   10. Rust consumers composing schemas must use Utoipa 6. Core permit metadata
   uses `Arc<PolicyJson>`; call `to_value()` for a JSON tree. HTTP request and
   decision JSON retain the current strict contract.
 
-- Upgrade to Core 0.2.0, Bundle 0.2.0, and Cedar 4.13.0. Rebuild and re-sign
-  archives with Bundle CLI 0.2.0 before deploying this server. Old generator
-  versions remain rejected. Policy JSON consumers must support array-valued
-  `attr` in nested Cedar `has` expressions.
-
 ### Changed
 
 - Replace the yanked transitive `yoke-derive` 0.8.3 with the compatible 0.8.4
   release in both lockfiles so strict dependency audits pass.
-
 - Refresh both Rust lockfiles and pin GitHub Actions to current upstream commits.
 - Refresh application and fuzz dependencies, including Actix, Reqwest, UUID, and
   rstest, and update pinned GitHub Actions to their latest stable releases.

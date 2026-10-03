@@ -49,19 +49,13 @@ The version endpoint reports REST and Core package versions without a `v` prefix
 or Git description suffix. Policy versions require all four state fields; the
 optional schema revision is a distinct object with only `hash` and `loaded_at`.
 
-## Core 0.2 and Cedar 4.13 dependency refresh
-
-Rebuild and re-sign policy archives using Bundle CLI 0.2.0 before deploying the
-updated server. Archives must match Bundle 0.2.0, Core 0.2.0, and Cedar 4.13.0
-generator metadata; do not edit signed archives. Manifest and signature format
-version 2 and declared label targets are unchanged. Consumers that inspect Cedar
-policy JSON must handle an array-valued `attr` for nested `has` expressions.
-
 ## Core and Bundle 0.3 upgrade
 
 Rebuild and re-sign archives with Bundle CLI 0.3.0 before deploying the server.
 The exact generator tuple is Bundle 0.3.0, Core 0.3.0, and Cedar 4.13.0. Keep
 manifest and signature format version 2 and the existing label target syntax.
+When upgrading from Core 0.1, Cedar policy JSON consumers must also handle
+array-valued `attr` for nested `has` expressions.
 
 Rust integrations composing OpenAPI schemas must upgrade to Utoipa 6. Core's
 `PermitPolicy.json` uses `Arc<PolicyJson>`; use `to_value()` to inspect or edit a
@@ -70,6 +64,6 @@ The HTTP authorization JSON contract is unchanged. Existing strict-contract
 SDKs and CLI clients require no model changes. Regenerate OpenAPI-derived
 artifacts to reflect nullable-reference ordering in the new generator.
 
-Publish Bundle 0.3.0 before changing REST to its crates.io dependency and before
-activating the Bundle Action's 0.3.0 binary download default. Candidate verification
-may pin an exact Bundle Git revision until that release is available.
+Both the application and fuzz lockfiles use the published Core and Bundle
+0.3.0 crates with registry checksums. Use Bundle CLI 0.3.0 when building archives
+for this server.
