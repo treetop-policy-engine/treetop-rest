@@ -1,9 +1,23 @@
-# Breaking 0.1.0 migration
+# Migration guide
+
+## REST 0.2.0 with Core and Bundle 0.3.0
+
+Deploy the REST `v0.2.0` container or native server release. It requires the
+published Core and Bundle 0.3.0 crates and Cedar 4.13.0. Before deployment, rebuild
+and re-sign policy archives with Bundle CLI 0.3.0 (or Bundle Action v3). Archives
+from older generator versions are rejected, including existing format 2 archives.
+Do not edit signed archive metadata.
+
+Keep source manifests at format 2 and retain exact declared label targets.
+Authorization HTTP JSON is unchanged. Rust integrations using schema composition
+must use Utoipa 6; permit JSON migration details appear below.
+
+## Breaking 0.1.0 migration
 
 Upgrade Core, Bundle, REST, SDKs, CLI, and frontend together. Early releases
 prioritize correctness and a strict current contract over compatibility.
 
-## Declared label targets
+### Declared label targets
 
 Every rule owns one exact `(fully qualified Cedar resource type, attribute)`:
 
@@ -29,7 +43,7 @@ re-sign them. Format 1 is rejected. REST uses Bundle's parser and Core's ownersh
 rules; a failed reload leaves the active policies, schema, labels, and version
 intact. Existing sessions retain their complete original generation.
 
-## HTTP and clients
+### HTTP and clients
 
 - Replace `/api/v1/health` with `/livez` for liveness and `/readyz` for readiness.
 - Replace `/api-docs/openapi.json` with `/openapi.json`.
@@ -38,9 +52,9 @@ intact. Existing sessions retain their complete original generation.
 - Require status `request_limits` and `request_context`; `max_batch_size` is present.
 - Regenerate client types from the checked-in OpenAPI and upgrade all SDKs.
 
-## Published dependencies
+### Published dependencies
 
-The published REST 0.1.0 release requires Core 0.1.0 and Bundle 0.1.0 from crates.io.
+REST 0.2.0 requires published Core 0.3.0 and Bundle 0.3.0 from crates.io.
 Both the application and
 fuzz lockfiles use registry sources without candidate Git patches. Release Core,
 then Bundle, then REST before upgrading SDKs and their consumers.
@@ -49,7 +63,7 @@ The version endpoint reports REST and Core package versions without a `v` prefix
 or Git description suffix. Policy versions require all four state fields; the
 optional schema revision is a distinct object with only `hash` and `loaded_at`.
 
-## Core and Bundle 0.3 upgrade
+### Core and Bundle 0.3 upgrade
 
 Rebuild and re-sign archives with Bundle CLI 0.3.0 before deploying the server.
 The exact generator tuple is Bundle 0.3.0, Core 0.3.0, and Cedar 4.13.0. Keep

@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-03
+
 ### Breaking changes
 
 - Upgrade to Core and Bundle 0.3.0. Rebuild and re-sign archives with Bundle CLI
