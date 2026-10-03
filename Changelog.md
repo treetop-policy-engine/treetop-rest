@@ -21,6 +21,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refresh the release dependency set, including Actix HTTP, tracing middleware,
+  UUID, LRU, both lockfiles, and reviewed immutable Action pins.
+- Retain Gungraun 0.19.4 after 0.20.0 changed tiny-benchmark counts and repeatedly
+  produced an invalid zero-count schema-reload measurement in CI. Keep all
+  performance gates enabled; see [performance notes](docs/performance.md).
+
 - Replace the yanked transitive `yoke-derive` 0.8.3 with the compatible 0.8.4
   release in both lockfiles so strict dependency audits pass.
 - Refresh both Rust lockfiles and pin GitHub Actions to current upstream commits.
