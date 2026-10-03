@@ -161,3 +161,19 @@ fn openapi_describes_response_formats_and_operation_tags() {
     assert!(metrics_content["application/openmetrics-text"].is_object());
     assert!(metrics_content["application/vnd.google.protobuf"].is_object());
 }
+
+#[test]
+fn compact_permit_json_remains_an_unconstrained_wire_value() {
+    let spec = generated_spec();
+    let policy = &spec["components"]["schemas"]["PermitPolicy"];
+    assert!(
+        policy["required"]
+            .as_array()
+            .unwrap()
+            .contains(&serde_json::json!("json"))
+    );
+    let json = policy["properties"]["json"].as_object().unwrap();
+    assert!(!json.contains_key("type"));
+    assert!(!json.contains_key("$ref"));
+    assert!(spec["components"]["schemas"]["PolicyJson"].is_null());
+}
