@@ -1357,10 +1357,10 @@
           "source": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/Endpoint"
               },
               {
-                "$ref": "#/components/schemas/Endpoint"
+                "type": "null"
               }
             ]
           }
@@ -1438,10 +1438,10 @@
           "details": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/ErrorDetails"
               },
               {
-                "$ref": "#/components/schemas/ErrorDetails"
+                "type": "null"
               }
             ]
           },
@@ -1561,10 +1561,10 @@
           "source": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/Endpoint"
               },
               {
-                "$ref": "#/components/schemas/Endpoint"
+                "type": "null"
               }
             ]
           },
@@ -1609,10 +1609,10 @@
           "source": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/Endpoint"
               },
               {
-                "$ref": "#/components/schemas/Endpoint"
+                "type": "null"
               }
             ]
           },
@@ -1657,10 +1657,10 @@
           "source": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/Endpoint"
               },
               {
-                "$ref": "#/components/schemas/Endpoint"
+                "type": "null"
               }
             ]
           },
@@ -1719,7 +1719,9 @@
           "cedar_id": {
             "type": "string"
           },
-          "json": {},
+          "json": {
+            "description": "Shared immutable Cedar JSON, compacted when this metadata is constructed.\n\nSerialize directly without reconstructing a JSON tree. Use\n[`PolicyJson::to_value`] for an owned, mutable copy."
+          },
           "literal": {
             "type": "string"
           }
@@ -1754,10 +1756,10 @@
           "bundle": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/BundleMetadata"
               },
               {
-                "$ref": "#/components/schemas/BundleMetadata"
+                "type": "null"
               }
             ]
           },
@@ -1836,11 +1838,11 @@
           "label_set": {
             "oneOf": [
               {
-                "type": "null"
-              },
-              {
                 "$ref": "#/components/schemas/LabelSetVersion",
                 "description": "Application-defined label-set version, when the installed registry has one."
+              },
+              {
+                "type": "null"
               }
             ]
           },
@@ -1933,10 +1935,10 @@
           "fallback_reason": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/RequestContextFallbackReason"
               },
               {
-                "$ref": "#/components/schemas/RequestContextFallbackReason"
+                "type": "null"
               }
             ]
           },
@@ -2145,10 +2147,10 @@
           "schema": {
             "oneOf": [
               {
-                "type": "null"
+                "$ref": "#/components/schemas/SchemaVersionInfo"
               },
               {
-                "$ref": "#/components/schemas/SchemaVersionInfo"
+                "type": "null"
               }
             ]
           },

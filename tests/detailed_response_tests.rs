@@ -48,6 +48,16 @@ permit (
     assert!(resp.status().is_success());
 
     let body = test::read_body(resp).await;
+    let wire: serde_json::Value = serde_json::from_slice(&body).unwrap();
+    let policies: cedar_policy::PolicySet = dsl.parse().unwrap();
+    let expected_json = policies.policies().next().unwrap().to_json().unwrap();
+    let wire_policy = &wire["results"][0]["result"]["policy"][0];
+    assert_eq!(wire_policy["json"], expected_json);
+    assert!(wire_policy["json"].is_object());
+    assert_eq!(wire["results"][0]["result"]["version"], wire["version"]);
+    assert!(wire["version"].get("label_set").is_some());
+    assert!(wire["version"]["generation"].is_u64());
+
     let response: AuthorizeResponseVariant = serde_json::from_slice(&body).unwrap();
     let AuthorizeResponseVariant::Detailed(response) = response else {
         panic!("full detail request returned a brief response");
@@ -61,6 +71,7 @@ permit (
         BatchResult::Success { data } => {
             assert!(matches!(data.decision, DecisionBrief::Allow));
             assert_eq!(data.policy.len(), 1);
+            assert_eq!(data.policy[0].json.to_value(), expected_json);
         }
         BatchResult::Failed { message } => panic!("authorization failed: {message}"),
     }
