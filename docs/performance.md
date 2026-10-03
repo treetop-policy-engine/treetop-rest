@@ -116,7 +116,7 @@ engine, preventing the unchanged archive from being downloaded on every later re
 Run an individual comparison locally with the Gungraun runner matching the repository dependency:
 
 ```bash
-cargo install gungraun-runner --version 0.19.4 --locked
+cargo install gungraun-runner --version 0.20.0 --locked
 cargo bench --bench authorize_batch_brief_128_callgrind
 cargo bench --bench authorize_batch_metrics_128_callgrind
 cargo bench --bench bundle_prepare_schema_mode_callgrind

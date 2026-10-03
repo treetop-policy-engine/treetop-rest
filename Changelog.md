@@ -21,6 +21,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Refresh the release dependency set, including Actix HTTP, tracing middleware,
+  UUID, LRU, Gungraun 0.20, both lockfiles, and reviewed immutable Action pins.
+
 - Replace the yanked transitive `yoke-derive` 0.8.3 with the compatible 0.8.4
   release in both lockfiles so strict dependency audits pass.
 - Refresh both Rust lockfiles and pin GitHub Actions to current upstream commits.
