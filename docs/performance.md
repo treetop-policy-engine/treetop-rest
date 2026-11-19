@@ -116,7 +116,7 @@ engine, preventing the unchanged archive from being downloaded on every later re
 Run an individual comparison locally with the Gungraun runner matching the repository dependency:
 
 ```bash
-cargo install gungraun-runner --version 0.19.4 --locked
+cargo install gungraun-runner --version 0.20.0 --locked
 cargo bench --bench authorize_batch_brief_128_callgrind
 cargo bench --bench authorize_batch_metrics_128_callgrind
 cargo bench --bench bundle_prepare_schema_mode_callgrind
@@ -312,7 +312,7 @@ all artifacts before sharing them.
 | `TREETOP_REST_SCALE_SOAK_SECONDS` | `900` in soak mode | Mixed-traffic soak duration. |
 | `TREETOP_REST_SCALE_RELOAD_INTERVAL_SECONDS` | `60` | Delay between completed soak reloads. |
 | `TREETOP_REST_SCALE_OUTPUT_DIR` | `performance-results/policy-scale` | Artifact root. |
-| `TREETOP_REST_SCALE_TOOLCHAIN` | `1.98.1` | Rust toolchain used for the release build and run. |
+| `TREETOP_REST_SCALE_TOOLCHAIN` | `1.100.0` | Rust toolchain used for the release build and run. |
 
 The weekly workflow and manual runs are observational and threshold-free. Compare the full curve and repeated runs,
 and investigate changes in latency, throughput, loading time, memory, series count, or metric shape rather than treating
@@ -494,15 +494,8 @@ may still be considered infrastructure information in some environments.
 Metric exposition, PromQL examples, bucket layout, and migration guidance are documented in
 [the metrics API reference](api.md#get-metrics).
 
-## Gungraun compatibility holdback
+## Gungraun and Valgrind versions
 
-The release keeps Gungraun and its runner at 0.19.4. Gungraun 0.20.0 changed
-the generated benchmark wrappers: with Rust 1.99.0 the unchanged disabled-access
-case increased from 11 to 12 instructions. The schema-reload case also repeatedly
-reported zero instructions in the Ubuntu CI environment, while local Valgrind
-3.26 measured the operation. These results cannot establish comparable release
-baselines. See the [dependency PR measurements](https://github.com/treetop-policy-engine/treetop-rest/pull/90).
-
-Runtime dependency updates remain included. The 8% regression gate and every
-benchmark remain enabled. Revisit the benchmark-tool upgrade when all existing
-operations produce valid, comparable measurements on the supported CI toolchain.
+The comparison workflow uses Ubuntu 26.04 for both base and head. The previous
+Ubuntu runner reported zero instructions for schema reload with Gungraun 0.20.0.
+See the [previous dependency PR measurements](https://github.com/treetop-policy-engine/treetop-rest/pull/90).

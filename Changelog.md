@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+- Update the Rust container builder and policy-scale toolchain to 1.100.0.
+
+### Security
+
+- Refresh Rustls in the server and fuzz lockfiles.
+
 ## [0.2.0] - 2026-10-03
 
 ### Breaking changes
