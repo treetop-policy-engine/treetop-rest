@@ -44,7 +44,7 @@ concurrency:
 
 env:
   CARGO_TERM_COLOR: always
-  TREETOP_REST_SCALE_TOOLCHAIN: "1.98.1"
+  TREETOP_REST_SCALE_TOOLCHAIN: "1.100.0"
 
 jobs:
   characterize:
@@ -62,10 +62,10 @@ jobs:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - name: Install Rust 1.98.1
-        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # master
+      - name: Install Rust 1.100.0
+        uses: dtolnay/rust-toolchain@df2a88e9fe4098bad09cb42c3dec7187f15861fc # master
         with:
-          toolchain: 1.98.1
+          toolchain: 1.100.0
 
       - name: Cache Cargo artifacts
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
@@ -87,7 +87,7 @@ jobs:
 
       - name: Upload scale artifacts
         if: always()
-        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: policy-scale-${{ github.run_id }}-${{ github.run_attempt }}
           path: performance-results/policy-scale
