@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
-- Refresh Rustls in the server and fuzz lockfiles.
+- Update Rustls to 0.23.46 and Zip to 9.7.3 in the server and fuzz lockfiles.
 
 ## [0.2.0] - 2026-10-03
 
