@@ -325,8 +325,8 @@ Example response:
 {
   "version": "0.2.0",
   "core": {
-    "version": "0.3.0",
-    "cedar": "4.13.0"
+    "version": "0.4.0",
+    "cedar": "4.15.0"
   },
   "policies": {
     "hash": "c82d116854d77bf689c3d15e167764876dffe869c970bc08ab7c5dacd7726219",
@@ -475,7 +475,7 @@ break the bundle's atomic policy/schema/label state.
 
 - Purpose: verify and atomically replace the complete policy, schema, and label state from a Treetop `.tar.gz` bundle.
 - Creation: use the
-  [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.6/README.md#commands) to validate,
+  [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.4.0/README.md#commands) to validate,
   build, and optionally sign compatible archives:
 
   ```bash
@@ -488,7 +488,7 @@ break the bundle's atomic policy/schema/label state.
   `treetop-bundle`, and never upload or configure them in Treetop REST. The REST service loads only trusted Ed25519 SPKI
   public keys for verification. `treetop-bundle` 0.0.6 supports password-encrypted PKCS#8 private keys through
   `--signing-key-password-file` or `TREETOP_BUNDLE_SIGNING_KEY_PASSWORD`; see its
-  [signing-key documentation](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.6/README.md#signing-keys).
+  [signing-key documentation](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.4.0/README.md#signing-keys).
   REST does not enable encrypted-private-key loading because it never handles private keys; this does not affect its
   ability to verify bundles produced with encrypted signing keys.
 

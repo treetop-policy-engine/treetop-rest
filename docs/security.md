@@ -125,7 +125,7 @@ continue with schema-free or schema-incompatible fallback behavior where documen
 
 ## Bundles and signatures
 
-Use the [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.6/README.md) to validate,
+Use the [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.4.0/README.md) to validate,
 build, and optionally sign deterministic bundle archives.
 
 `TREETOP_BUNDLE_SIGNATURE_POLICY` controls signature enforcement:
