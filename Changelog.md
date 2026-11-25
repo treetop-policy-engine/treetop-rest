@@ -15,6 +15,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Security
 
+- Remove the unused Actix cookie feature and its dependency on cookie 0.16.2
+  (RUSTSEC-2026-0594) from the server and fuzz builds.
 - Update Rustls to 0.23.46 and Zip to 9.8.2 in the server and fuzz lockfiles.
 
 ## [0.2.0] - 2026-10-03
