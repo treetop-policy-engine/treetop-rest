@@ -125,7 +125,7 @@ continue with schema-free or schema-incompatible fallback behavior where documen
 
 ## Bundles and signatures
 
-Use the [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.0.6/README.md) to validate,
+Use the [`treetop-bundle` CLI](https://github.com/treetop-policy-engine/treetop-bundle/blob/v0.4.0/README.md) to validate,
 build, and optionally sign deterministic bundle archives.
 
 `TREETOP_BUNDLE_SIGNATURE_POLICY` controls signature enforcement:
@@ -216,6 +216,17 @@ TREETOP_MAX_BUNDLE_UNCOMPRESSED_BYTES=52428800
 The reverse proxy should terminate TLS, sanitize `X-Forwarded-For`, enforce rate and connection limits, restrict public
 operational/documentation paths as required, and forward only from an address listed in `TREETOP_TRUSTED_PROXIES`.
 Mount trusted public keys read-only. Do not mount bundle private keys into the REST container.
+
+## Dependency audits
+
+The server and its fuzz targets have separate Cargo lockfiles. CI checks both
+against RustSec and fails on vulnerabilities or denied warnings. To reproduce
+the checks from the repository root, run both commands:
+
+```sh
+cargo audit --deny warnings --file Cargo.lock
+cargo audit --deny warnings --file fuzz/Cargo.lock
+```
 
 ## Rotation and compromise response
 

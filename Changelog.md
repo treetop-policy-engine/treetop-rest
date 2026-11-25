@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Breaking changes
+
+- Upgrade to Core and Bundle 0.4.0 and Cedar 4.15.0. Rebuild and re-sign
+  policy archives with Bundle CLI 0.4.0 before deploying the updated server.
+
+### Changed
+
+- Use Jiff for RFC 3339 metadata timestamps. Rust code that constructs
+  `Metadata.timestamp` or `BundleMetadata.loaded_at` now takes `jiff::Timestamp`.
+- Update the Rust container builder and policy-scale toolchain to 1.100.0.
+
+### Security
+
+- Restrict CI builds to read-only repository access. Only publishing jobs can
+  write container images, and only the tagged release job can publish binaries.
+- Remove the unused Actix cookie feature and its dependency on cookie 0.16.2
+  (RUSTSEC-2026-0594) from the server and fuzz builds.
+- Update Rustls to 0.23.46 and Zip to 9.8.2 in the server and fuzz lockfiles.
+
 ## [0.2.0] - 2026-10-03
 
 ### Breaking changes

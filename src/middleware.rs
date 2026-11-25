@@ -351,8 +351,8 @@ where
             correlation_id = %correlation_id
         );
 
-        let method = req.method().to_string();
-        let path = req.path().to_string();
+        let method = req.method().clone();
+        let uri = req.uri().clone();
         let client_ip = req
             .extensions()
             .get::<ResolvedClientIp>()
@@ -361,7 +361,7 @@ where
         let client_ip_s = client_ip.map(|ip| ip.to_string());
 
         let start_time = Instant::now();
-        info!(request_id = %request_id, correlation_id = %correlation_id, message = "Request start", method = &method, path = &path, client_ip = client_ip_s.as_deref());
+        info!(request_id = %request_id, correlation_id = %correlation_id, message = "Request start", method = method.as_str(), path = uri.path(), client_ip = client_ip_s.as_deref());
 
         let fut = self.service.call(req);
 
@@ -370,16 +370,13 @@ where
                 let mut res = fut.await?;
 
                 let elapsed_time = start_time.elapsed();
-                info!(message = "Request end", request_id = %request_id, correlation_id = %correlation_id, method = &method, path = &path, client_ip = client_ip_s.as_deref(), run_time = ?elapsed_time, status_code = ?res.status());
+                info!(message = "Request end", request_id = %request_id, correlation_id = %correlation_id, method = method.as_str(), path = uri.path(), client_ip = client_ip_s.as_deref(), run_time = ?elapsed_time, status_code = ?res.status());
                 // Record HTTP metrics
                 let status_code = res.status().as_u16();
-                let metrics_path = res
-                    .request()
-                    .match_pattern()
-                    .unwrap_or_else(|| "unmatched".to_owned());
+                let metrics_path = res.request().match_pattern();
                 metrics::http_metrics().observe(
-                    &method,
-                    &metrics_path,
+                    method.as_str(),
+                    metrics_path.as_deref().unwrap_or("unmatched"),
                     status_code,
                     client_ip_s.as_deref(),
                     elapsed_time.as_secs_f64(),

@@ -1,5 +1,15 @@
 # Migration guide
 
+## REST 0.3.0 with Core and Bundle 0.4.0
+
+Rebuild and re-sign policy archives with Bundle CLI 0.4.0 before deploying
+REST 0.3.0. The server requires the exact Bundle 0.4.0, Core 0.4.0, and Cedar
+4.15.0 generator versions. Reuse the existing format 2 source manifests.
+
+Rust callers that construct metadata must supply a `jiff::Timestamp` for
+`Metadata.timestamp` and `BundleMetadata.loaded_at`. HTTP clients can
+continue reading and writing RFC 3339 timestamps.
+
 ## REST 0.2.0 with Core and Bundle 0.3.0
 
 Deploy the REST `v0.2.0` container or native server release. It requires the

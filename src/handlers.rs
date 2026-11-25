@@ -391,7 +391,11 @@ pub async fn version(
     } else {
         Some(SchemaVersionInfo {
             hash: store.schema.sha256.clone(),
-            loaded_at: store.schema.timestamp.to_rfc3339(),
+            loaded_at: store
+                .schema
+                .timestamp
+                .strftime("%Y-%m-%dT%H:%M:%S%.f%:z")
+                .to_string(),
         })
     };
     Ok(web::Json(VersionInfo {
