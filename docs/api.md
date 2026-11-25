@@ -323,7 +323,7 @@ Example response:
 
 ```json
 {
-  "version": "0.2.0",
+  "version": "0.3.0",
   "core": {
     "version": "0.4.0",
     "cedar": "4.15.0"
