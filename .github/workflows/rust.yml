@@ -59,8 +59,11 @@ jobs:
           tool: cargo-audit@0.23.0
       - name: Audit locked dependencies
         run: |
-          cargo audit --deny warnings
-          cargo audit --deny warnings --file fuzz/Cargo.lock
+          status=0
+          for lockfile in Cargo.lock fuzz/Cargo.lock; do
+            cargo audit --deny warnings --file "$lockfile" || status=1
+          done
+          exit "$status"
 
   publish-develop:
     name: Publish “develop” image

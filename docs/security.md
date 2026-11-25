@@ -217,6 +217,17 @@ The reverse proxy should terminate TLS, sanitize `X-Forwarded-For`, enforce rate
 operational/documentation paths as required, and forward only from an address listed in `TREETOP_TRUSTED_PROXIES`.
 Mount trusted public keys read-only. Do not mount bundle private keys into the REST container.
 
+## Dependency audits
+
+The server and its fuzz targets have separate Cargo lockfiles. CI checks both
+against RustSec and fails on vulnerabilities or denied warnings. To reproduce
+the checks from the repository root, run both commands:
+
+```sh
+cargo audit --deny warnings --file Cargo.lock
+cargo audit --deny warnings --file fuzz/Cargo.lock
+```
+
 ## Rotation and compromise response
 
 ### Access token
