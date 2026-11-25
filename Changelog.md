@@ -9,11 +9,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+- Use Jiff for RFC 3339 metadata timestamps. Rust code that constructs
+  `Metadata.timestamp` or `BundleMetadata.loaded_at` now takes `jiff::Timestamp`.
 - Update the Rust container builder and policy-scale toolchain to 1.100.0.
 
 ### Security
 
-- Update Rustls to 0.23.46 and Zip to 9.7.3 in the server and fuzz lockfiles.
+- Update Rustls to 0.23.46 and Zip to 9.8.2 in the server and fuzz lockfiles.
 
 ## [0.2.0] - 2026-10-03
 

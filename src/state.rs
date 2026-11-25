@@ -2,7 +2,7 @@ use cedar_policy::{
     PolicySet as CedarPolicySet, Schema as CedarSchema, ValidationMode as CedarValidationMode,
     Validator as CedarValidator,
 };
-use chrono::{DateTime, Utc};
+use jiff::Timestamp;
 use lru::LruCache;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
@@ -64,7 +64,8 @@ pub trait MetadataParser {
 
 #[derive(Debug, Clone, Serialize, Deserialize, ToSchema)]
 pub struct Metadata<T> {
-    pub timestamp: DateTime<Utc>,
+    #[schema(value_type = String, format = DateTime)]
+    pub timestamp: Timestamp,
     pub sha256: String,
     pub size: usize,
     pub source: Option<Endpoint>,
@@ -108,7 +109,7 @@ impl<T: MetadataParser> Metadata<T> {
     ) -> Result<Self, ServiceError> {
         if content.is_empty() && source.is_none() && refresh_frequency.is_none() {
             return Ok(Metadata {
-                timestamp: Utc::now(),
+                timestamp: Timestamp::now(),
                 sha256: String::new(),
                 size: 0,
                 source,
@@ -138,7 +139,7 @@ impl<T: MetadataParser> Metadata<T> {
         }
 
         Ok(Metadata {
-            timestamp: Utc::now(),
+            timestamp: Timestamp::now(),
             sha256,
             size,
             source,
@@ -168,7 +169,7 @@ impl<T: MetadataParser> Metadata<T> {
             );
         }
         Self {
-            timestamp: Utc::now(),
+            timestamp: Timestamp::now(),
             sha256,
             size,
             source,
@@ -772,7 +773,7 @@ impl PolicyStore {
                 signing_key_id: signature.key_id().map(ToString::to_string),
                 source,
                 refresh_frequency,
-                loaded_at: Utc::now(),
+                loaded_at: Timestamp::now(),
             },
         })
     }
@@ -941,7 +942,7 @@ mod tests {
                 signing_key_id: None,
                 source: None,
                 refresh_frequency: None,
-                loaded_at: Utc::now(),
+                loaded_at: Timestamp::now(),
             },
         }
     }

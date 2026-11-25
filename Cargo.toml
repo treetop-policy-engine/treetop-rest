@@ -21,22 +21,21 @@ actix-web = { version = "4.20.0", default-features = false, features = [
     "compat",
     "ws",
 ] }
-chrono = { version = "0.4.45", features = ["serde"] }
-clap = { version = "4.6.8", features = ["derive", "env"] }
+jiff = { version = "1.0.3", default-features = false, features = ["std", "serde"] }
+clap = { version = "4.6.10", features = ["derive", "env"] }
 futures-util = "0.3.34"
 ipnet = "2.12.2"
-lru = "0.19.0"
+lru = "0.19.2"
 rayon = "1.12.0"
 regex = "1.13.2"
 reqwest = { version = "0.13.5", features = ["json", "stream"] }
 serde = "1.0.229"
 serde_json = "1.0.154"
-sha2 = "0.11.1"
+sha2 = "0.11.2"
 subtle = "2.6.1"
 tokio = { version = "1.54.1", features = ["full"] }
 tracing = "0.1.44"
 tracing-subscriber = { version = "0.3.23", features = [
-    "chrono",
     "env-filter",
     "json",
     "serde",
@@ -45,8 +44,8 @@ tracing-subscriber = { version = "0.3.23", features = [
 treetop-core = { version = "=0.3.0", features = ["observability"] }
 treetop-bundle = { version = "=0.3.0", default-features = false }
 prometheus-client = { version = "0.26.0", features = ["prometheus_protobuf", "protobuf-protox"] }
-url = { version = "2.5.8", features = ["serde"] }
-utoipa = { version = "6.0.0", features = ["actix_extras", "chrono", "yaml"] }
+url = { version = "2.5.9", features = ["serde"] }
+utoipa = { version = "6.0.0", features = ["actix_extras", "yaml"] }
 utoipa-swagger-ui = { version = "10.0.2", features = ["actix-web", "vendored"] }
 uuid = { version = "1.29.3", features = ["v4"] }
 # Keep Cedar aligned with the exact Core and Bundle release dependencies.
@@ -55,10 +54,10 @@ cedar-policy = "=4.13.0"
 [dev-dependencies]
 futures = "0.3.34"
 actix-rt = "2.16.0"
-actix-http = "3.22.0"
+actix-http = "3.22.1"
 base64 = "0.23.1"
 ed25519-dalek = { version = "3.0.0", features = ["pem", "pkcs8"] }
-rstest = "0.28.0"
+rstest = "0.29.0"
 tempfile = "3.27.0"
 gungraun = "0.20.0"
 treetop-core = { version = "=0.3.0", features = ["bench-internal"] }
@@ -66,7 +65,7 @@ treetop-core = { version = "=0.3.0", features = ["bench-internal"] }
 [build-dependencies]
 cargo_metadata = "0.23.1"
 serde_json = "1.0.154"
-vergen = { version = "10.0.3", features = [
+vergen = { version = "10.0.4", features = [
     "emit_and_set",
     "build",
     "cargo",
@@ -74,7 +73,7 @@ vergen = { version = "10.0.3", features = [
     "rustc",
     "si",
 ] }
-vergen-gitcl = { version = "10.0.3", features = [
+vergen-gitcl = { version = "10.0.4", features = [
     "emit_and_set",
     "build",
     "cargo",

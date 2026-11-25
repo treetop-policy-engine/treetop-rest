@@ -1459,3 +1459,21 @@ async fn version_reports_package_versions_without_git_describe() {
     );
     assert!(response.schema.is_none());
 }
+
+#[actix_web::test]
+async fn schema_load_time_preserves_rfc3339_precision_and_utc_offsets() {
+    let store = create_test_store();
+    {
+        let mut store = store.write().unwrap();
+        store.set_schema(CONTEXT_SCHEMA_JSON, None, None).unwrap();
+        store.schema.timestamp = "2026-01-02T03:04:05.123456789Z".parse().unwrap();
+        let metadata = serde_json::to_value(&store.schema).unwrap();
+        assert_eq!(metadata["timestamp"], "2026-01-02T03:04:05.123456789Z");
+    }
+
+    let response = handlers::version(web::Data::new(store)).await.unwrap();
+    assert_eq!(
+        response.schema.as_ref().unwrap().loaded_at,
+        "2026-01-02T03:04:05.123456789+00:00"
+    );
+}

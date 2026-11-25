@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::ops::Deref;
 
-use chrono::{DateTime, Utc};
+use jiff::Timestamp;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use treetop_core::{AttrValue, Decision, PermitPolicy, PolicyVersion, Request};
@@ -228,7 +228,8 @@ pub struct BundleMetadata {
     pub source: Option<Endpoint>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub refresh_frequency: Option<u32>,
-    pub loaded_at: DateTime<Utc>,
+    #[schema(value_type = String, format = DateTime)]
+    pub loaded_at: Timestamp,
 }
 
 impl<T> From<T> for PoliciesMetadata
